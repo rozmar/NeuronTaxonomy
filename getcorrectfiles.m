@@ -1,0 +1,10 @@
+indexes = [];
+for i = 1 : size(id,1) ;
+  fname = procMatrix.fileNames{i};
+  for j = 1 : length(filesnames) ;
+    if strcmp(fname,filesnames{j})==1 ;
+      indexes(i) = j;
+      break;
+    end;
+  end;
+end;
