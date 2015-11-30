@@ -21,7 +21,8 @@ for i=1:size(raw,1);
     c=num2str(raw{i,6});
     
     fidx=find(strcmp([fname,'.mat'],alltheivdata.fnames),1,'first');
-    load([alltheivdata.paths{fidx},'/',alltheivdata.fnames{fidx}]);
+    iv=load([alltheivdata.paths{fidx},'/',alltheivdata.fnames{fidx}]);
+    iv=iv.iv;
     finames=fieldnames(iv);
     gs=[];
     ss=[];

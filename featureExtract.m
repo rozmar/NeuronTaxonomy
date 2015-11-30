@@ -62,7 +62,7 @@ function cellStruct = featureExtract(iv,dataDir)
 	
 	cellStruct.pulseEnd = getPulseEnd(x,iv.segment);
 
-	[apMasks cellStruct.apNums] = labelAP(x,Y,cellStruct.taustart,cellStruct.pulseEnd,cellStruct.dvrs,hundredMicsStep,minapamplitude);
+	[apMasks cellStruct.apNums] = labelAP(x,Y,cellStruct.taustart,cellStruct.pulseEnd,cellStruct.dvrs,hundredMicsStep,minapamplitude,iv.current);
 
 	[cellStruct.apFeatures cellStruct.apNums] = describeAP(x,Y,apMasks,cellStruct.apNums,cellStruct.taustart,cellStruct.pulseEnd);
 	

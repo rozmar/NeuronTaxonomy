@@ -1,38 +1,56 @@
-%%  setting path,generating txt
+%  setting path,generating txt
 close all
 clear all
 
 ivpercell='N';
-savetheIV=0;
+savetheIV=1;
 
 locations=marcicucca_locations;
 defPath=[locations.tgtardir,'MATLABdata/IV'];
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/quantal'];
-listName='mg.txt';
 
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_NGF'];
-listName='realngfcelldata.txt';
+projects(1).Name='quantal';
+projects(1).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/quantal'];
+projects(1).listName='mg.txt';
 
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF'];
-listName='lowhigh.txt';
+projects(2).Name='humanNGF-old';
+projects(2).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_NGF'];
+projects(2).listName='realngfcelldata.txt';
 
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Human_pyr_USA'];
-listName='harvestdata.txt';
-xlsname='harvestpyr.xls';
+projects(3).Name='low-highNGF';
+projects(3).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF'];
+projects(3).listName='lowhigh.txt';
+
+projects(4).Name='Human_pyr_harvest';
+projects(4).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Human_pyr_USA'];
+projects(4).listName='harvestdata.txt';
+projects(4).xlsname='harvestpyr.xls';
+
+projects(5).Name='Rat_AAC_vs_BC';
+projects(5).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/AAC-BC'];
+projects(5).listName='AACBCharvest.txt';
+projects(5).xlsname='AACBCharvest.xls';
+
+projects(6).Name='Magor-szabina';
+projects(6).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Magor-Szabina'];
+projects(6).listName='magor-szabina.txt';
+projects(6).xlsname='magor-szabina.xls';
+
+projects(7).Name='Human_rosehip';
+projects(7).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_rosehip'];
+projects(7).listName='Human_stut.txt';
+projects(7).xlsname='Human_stut.xls';
+
+projects(8).Name='Human_AAC';
+projects(8).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_AAC'];
+projects(8).listName='humanAAC.txt';
+projects(8).xlsname='humanAAC.xls';
 
 
+[Selection,ok]=listdlg('ListString',{projects.Name},'ListSize',[300 600]); 
 
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/AAC-BC'];
-listName='AACBCharvest.txt';
-xlsname='AACBCharvest.xls';
-
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Magor-Szabina'];
-listName='magor-szabina.txt';
-xlsname='magor-szabina.xls';
-
-listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_rosehip'];
-listName='Human_stut.txt';
-xlsname='Human_stut.xls';
+listPath=projects(Selection).listPath;
+listName=projects(Selection).listName;
+xlsname=projects(Selection).xlsname;
 
 taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell)
     
@@ -51,24 +69,29 @@ clabels=cls;
 [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
 inputDir=paths;
 %% extracting features
-if isempty(clabels)
-    delete([featDir,'/*.mat']);
-else
-    for i=1:length(clabels)
-        delete([featDir,'/',clabels(i),'/*.mat']);
-    end
+button = questdlg('Would you like to export raw IVs?','raw export','yes','no','yes');
+if strcmp(button,'yes')
+%     if isempty(clabels)
+%         delete([featDir,'/*.mat']);
+%     else
+%         for i=1:length(clabels)
+%             delete([featDir,'/',clabels(i),'/*.mat']);
+%         end
+%     end
+    processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
 end
-processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
-
 %% collecting specified features
-if isempty(clabels)
-    delete([datasumDir,'/*.mat']);
-    i=1;
-    collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels);
-else
-    for i=1:length(clabels)
-        delete([datasumDir,'/',clabels(i),'/*.mat']);
-        collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels(i));
+button = questdlg('Would you like to collect features?','collect features','yes','no','yes');
+if strcmp(button,'yes')
+    if isempty(clabels)
+%         delete([datasumDir,'/*.mat']);
+        i=1;
+        collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels);
+    else
+        for i=1:length(clabels)
+%             delete([datasumDir,'/',clabels(i),'/*.mat']);
+            collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels(i));
+        end
     end
 end
 %%
@@ -115,14 +138,14 @@ for i=1:hossz
                 save([ivdir,'/',clabels(i),'/',datasum.fname,'.mat'],'iv');
             end
             
-            figure(1)
-            clf
-            plot(iv.time,iv.v1)
-            hold on
-            plot(iv.time,iv.(['v',num2str(iv.sweepnum)]))
-            title(datasum.fname)
-            axis tight
-            %         pause
+%             figure(1)
+%             clf
+%             plot(iv.time,iv.v1)
+%             hold on
+%             plot(iv.time,iv.(['v',num2str(iv.sweepnum)]))
+%             title(datasum.fname)
+%             axis tight
+%                     pause
         end
     end
 end
@@ -172,6 +195,7 @@ for fieldnum=1:length(fieldek)
                 datforstat(classi).data(isnan(datforstat(classi).data))=[];
                 datforstat(classi).classname=uniqueclasses(classi);
             end
+            averagevalues=[];
             lillieps=[];
             ttestps=[];
             wilcoxonps=[];
@@ -183,7 +207,9 @@ for fieldnum=1:length(fieldek)
                 else
                     lillieps(1)=NaN;
                 end
+                averagevalues(1)=nanmean(datforstat(firstclassi).data);
                 for secondclassi=firstclassi+1:classnum
+                    averagevalues(2)=nanmean(datforstat(secondclassi).data);
                     constantstring=[num2str(uniqueclasses(firstclassi)),' vs ',num2str(uniqueclasses(secondclassi))];
                     if length(datforstat(secondclassi).data)>=4
                         [~,lillieps(2)]=lillietest(datforstat(secondclassi).data);
@@ -199,8 +225,8 @@ for fieldnum=1:length(fieldek)
                         ttestps=NaN;
                         wilcoxonps = NaN;
                     end
-                    statrow=[statrow,lillieps,ttestps,wilcoxonps];
-                    statheader=[statheader,{['lilliefors p for ',num2str(uniqueclasses(firstclassi))],['lilliefors p for ',num2str(uniqueclasses(secondclassi))],['t test ',constantstring],['wilcoxon test ',constantstring]}];
+                    statrow=[statrow,averagevalues,lillieps,ttestps,wilcoxonps];
+                    statheader=[statheader,{['average value for ',num2str(uniqueclasses(firstclassi))],['average value for ',num2str(uniqueclasses(secondclassi))],['lilliefors p for ',num2str(uniqueclasses(firstclassi))],['lilliefors p for ',num2str(uniqueclasses(secondclassi))],['t test ',constantstring],['wilcoxon test ',constantstring]}];
                 end
             end
           statmatrix(fieldnum,:)=statrow;
@@ -240,7 +266,7 @@ for fieldnum=1:length(fieldek)
     clear datanow
     for i=1:length(csoporok)
         alldata=[DATASUM.(fieldek{fieldnum})];
-        range=[min(alldata):(max(alldata)-min(alldata))/100:max(alldata)];
+        range=[min(alldata):(max(alldata)-min(alldata))/20:max(alldata)];
         subplot(length(csoporok)+1,1,1)
         hist(alldata,range)
         title(fieldek{fieldnum})
@@ -270,8 +296,8 @@ end
 
 %% principal component analysis
 mergecorrelatingvals=1;
-corrpval=.001;
-count=5;
+corrpval=.01;
+count=6;   
 
 [princomppsnew,IX]=sort(princompps);
 princompmatrixnew=princompmatrix(:,IX);
@@ -292,7 +318,11 @@ if mergecorrelatingvals==1
             end
         end
         mergeidx=find(tomerge);
-        princompnamesnewnew=[princompnamesnewnew,{[princompnamesnew{mergeidx}]}];
+        newname=[];
+        for namei=1:length(mergeidx)
+            newname=[newname,'-',princompnamesnew{mergeidx(namei)}];
+        end
+        princompnamesnewnew=[princompnamesnewnew,{newname}];
         princompnamesnew(mergeidx)=[];
         princompmatrixnewnew=[princompmatrixnewnew,princompmatrixnew(:,mergeidx(1))];
         princompmatrixnew(:,mergeidx)=[];
@@ -327,7 +357,7 @@ medians=[median(SCORE([DATASUM.class]==1,1)),median(SCORE([DATASUM.class]==1,2))
 
 plot3(SCORE([DATASUM.class]==1,1),SCORE([DATASUM.class]==1,2),SCORE([DATASUM.class]==1,3),'ro','MarkerFaceColor',[1 0 0]);
 plot3(SCORE([DATASUM.class]==2,1),SCORE([DATASUM.class]==2,2),SCORE([DATASUM.class]==2,3),'bo','MarkerFaceColor',[0 0 1]);
-plot3(SCORE([DATASUM.class]==3,1),SCORE([DATASUM.class]==3,2),SCORE([DATASUM.class]==3,3),'ko','MarkerFaceColor',[1 1 1]);
+plot3(SCORE([DATASUM.class]>2,1),SCORE([DATASUM.class]>2,2),SCORE([DATASUM.class]>2,3),'ko','MarkerFaceColor',[1 1 1]);
 
 xlabel('1st principal component')
 ylabel('2nd principal component')
@@ -369,7 +399,7 @@ ylim([-3 3])
 figure(2)
 clf
 hold on
-plot3(princompmatrixnew([DATASUM.class]==3,1),princompmatrixnew([DATASUM.class]==3,2),princompmatrixnew([DATASUM.class]==3,3),'ko','MarkerFaceColor',[1 1 1]);
+plot3(princompmatrixnew([DATASUM.class]>2,1),princompmatrixnew([DATASUM.class]>2,2),princompmatrixnew([DATASUM.class]>2,3),'ko','MarkerFaceColor',[1 1 1]);
 plot3(princompmatrixnew([DATASUM.class]==1,1),princompmatrixnew([DATASUM.class]==1,2),princompmatrixnew([DATASUM.class]==1,3),'ro','MarkerFaceColor',[1 0 0]);
 plot3(princompmatrixnew([DATASUM.class]==2,1),princompmatrixnew([DATASUM.class]==2,2),princompmatrixnew([DATASUM.class]==2,3),'bo','MarkerFaceColor',[0 0 1]);
 xlabel(princompnamesnew{1})
@@ -434,3 +464,203 @@ for i=1:length(finames)
         ylabel(finame)
     end 
 end
+%% MG Human AAC SAG/REBOUND cucc
+close all
+% DATASUM(find([DATASUM.sag]-[DATASUM.rebound]<-1))=[];
+[ids,ic,ci]=unique({DATASUM.ID});
+DATASUM=DATASUM(ic);
+figure
+subplot(2,1,1)
+hist([DATASUM.sag],[1:.05:2])
+ylabel('sag')
+xlim([1,2])
+ylim([0 10])
+ylim()
+subplot(2,1,2)
+hist([DATASUM.rebound],[1:.05:2])
+ylabel('rebound')
+xlim([1,2])
+ylim([0 10])
+
+butt=1
+while butt==1
+figure(2)
+plot([DATASUM.sag],[DATASUM.rebound],'ko')
+hold on
+xlim([.9,2])
+ylim([.9,2])
+plot([0,2],[0,2],'k-','LineWidth',2)
+[x,y,butt]=ginput(1);
+clf
+plot([DATASUM.sag],[DATASUM.rebound],'ko')
+hold on
+xlim([.9,2])
+ylim([.9,2])
+plot([0,2],[0,2],'k-','LineWidth',2)
+difs=abs([DATASUM.sag]-x)+abs([DATASUM.rebound]-y);
+[~,ezkell]=min(difs);
+plot([DATASUM(ezkell).sag],[DATASUM(ezkell).rebound],'ro','MarkerFaceColor',[1 0 0])
+figure(22)
+clf
+plot(DATASUM(ezkell).iv.time,DATASUM(ezkell).iv.v1,'k-')
+% hold on
+% plot(DATASUM(ezkell).iv.time,DATASUM(ezkell).iv.v2,'k-')
+title(num2str(ezkell))
+title(num2str(DATASUM(ezkell).ID))
+end
+%% cutting out APs, plotting variables
+load([locations.taxonomy.fetureextractorlocation,'/apFeatures.mat'],'featS');
+zeropos='apMaxPos';
+zeropos='threshold5Pos';
+dvperdtmovingaverage=8;
+sineeded=5;
+timebefore=.0005;
+timeafter=.001;
+appercell=[5];
+vonalvastagsag=3;
+APwaves=struct;
+figure(1)
+clf
+hold all
+for celli=1:length(DATASUM)
+    load([listPath,'/datafiles/',num2str(DATASUM(celli).class),'/data_iv_',DATASUM(celli).ID,'_',DATASUM(celli).fname,'.mat']);
+    zeroh=cellStruct.apFeatures(:,featS.(zeropos));
+    sweepnum=cellStruct.apFeatures(:,featS.sweepNum);
+    si=DATASUM(celli).si;
+    stepback=round(timebefore/si);
+    stepforward=round(timeafter/si);
+    for i=1:length(appercell)
+        api=appercell(i);
+        if api<=length(sweepnum)
+        APwaves(celli).V(:,i)=DATASUM(celli).iv.(['v',num2str(sweepnum(api))])(zeroh(api)-stepback:zeroh(api)+stepforward)+cellStruct.dvrs(sweepnum(api));
+        APwaves(celli).t(:,i)=[-stepback*si:si:stepforward*si];
+        APwaves(celli).dVperdt=diff(moving(APwaves(celli).V(:,i),dvperdtmovingaverage))/si;
+        APwaves(celli).dVperdtT=mean([APwaves(celli).t(1:end-1,i),APwaves(celli).t(2:end,i)],2);
+        APwaves(celli).dVperdtV=mean([APwaves(celli).V(1:end-1,i),APwaves(celli).V(2:end,i)],2);
+        
+        APwaves(celli).ddVperdt=diff(APwaves(celli).dVperdt(:,i))/si;
+        APwaves(celli).ddVperdtT=mean([APwaves(celli).dVperdtT(1:end-1,i),APwaves(celli).dVperdtT(2:end,i)],2);
+        APwaves(celli).ddVperdtV=mean([APwaves(celli).dVperdtV(1:end-1,i),APwaves(celli).dVperdtV(2:end,i)],2);
+        
+        
+        if DATASUM(celli).class<3
+            subplot(2,2, (DATASUM(celli).class-1)*2+1)
+            hold all
+            plot([APwaves(celli).t],[APwaves(celli).V])
+            subplot(2,2,DATASUM(celli).class*2)
+            hold all
+            plot([APwaves(celli).dVperdtT],[APwaves(celli).dVperdt])
+        end
+        end
+    end
+end
+%
+AACezeket=find([DATASUM.class]==1 & round([DATASUM.si]*10^6)==sineeded);
+aaccolor=[.7,.7,.7];
+BCezeket=find([DATASUM.class]==2 & round([DATASUM.si]*10^6)==sineeded);
+bccolor=[.7,.7,.7];
+figure(2)
+clf
+h1=subplot(2,4,1);
+hold on
+plot([APwaves(AACezeket).t],[APwaves(AACezeket).V],'color',aaccolor)
+hold on
+plot(mean([APwaves(AACezeket).t],2),mean([APwaves(AACezeket).V],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('Vm (V)')
+h2=subplot(2,4,2);
+hold on
+plot([APwaves(AACezeket).dVperdtT],[APwaves(AACezeket).dVperdt],'color',aaccolor)
+hold on
+plot(mean([APwaves(AACezeket).dVperdtT],2),mean([APwaves(AACezeket).dVperdt],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('dV/dt (V/s)')
+h3=subplot(2,4,3);
+hold on
+plot([APwaves(AACezeket).dVperdtV],[APwaves(AACezeket).dVperdt],'color',aaccolor)
+hold on
+plot(mean([APwaves(AACezeket).dVperdtV],2),mean([APwaves(AACezeket).dVperdt],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('Vm (V)')
+ylabel('dV/dt (V/s)')
+h4=subplot(2,4,4);
+hold on
+plot([APwaves(AACezeket).ddVperdtT],[APwaves(AACezeket).ddVperdt],'color',aaccolor)
+hold on
+plot(mean([APwaves(AACezeket).ddVperdtT],2),mean([APwaves(AACezeket).ddVperdt],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('d^2V/dt^2 (V/s^2)')
+
+h5=subplot(2,4,5);
+hold on
+plot([APwaves(BCezeket).t],[APwaves(BCezeket).V],'color',bccolor)
+hold on
+plot(mean([APwaves(BCezeket).t],2),mean([APwaves(BCezeket).V],2),'k-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('Vm (V)')
+h6=subplot(2,4,6);
+hold on
+plot([APwaves(BCezeket).dVperdtT],[APwaves(BCezeket).dVperdt],'color',bccolor)
+hold on
+plot(mean([APwaves(BCezeket).dVperdtT],2),mean([APwaves(BCezeket).dVperdt],2),'k-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('dV/dt (V/s)')
+h7=subplot(2,4,7);
+hold on
+plot([APwaves(BCezeket).dVperdtV],[APwaves(BCezeket).dVperdt],'color',bccolor)
+hold on
+plot(mean([APwaves(BCezeket).dVperdtV],2),mean([APwaves(BCezeket).dVperdt],2),'k-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('Vm (V)')
+ylabel('dV/dt (V/s)')
+h8=subplot(2,4,8);
+hold on
+plot([APwaves(BCezeket).ddVperdtT],[APwaves(BCezeket).ddVperdt],'color',bccolor)
+hold on
+plot(mean([APwaves(BCezeket).ddVperdtT],2),mean([APwaves(BCezeket).ddVperdt],2),'k-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('d^2V/dt^2 (V/s^2)')
+
+linkaxes([h1,h5],'xy');
+linkaxes([h2,h6],'xy');
+linkaxes([h4,h8],'xy');
+% linkaxes([h1,h2,h4,h5,h6,h8],'x');
+linkaxes([h3,h7],'xy');
+
+% vonalvastagsag=1;
+figure(3)
+clf
+subplot(2,2,1);
+hold on
+plot(mean([APwaves(BCezeket).t],2),mean([APwaves(BCezeket).V],2),'k-','LineWidth',vonalvastagsag)
+plot(mean([APwaves(AACezeket).t],2),mean([APwaves(AACezeket).V],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('Vm (V)')
+subplot(2,2,2);
+hold on
+plot(mean([APwaves(BCezeket).dVperdtT],2),mean([APwaves(BCezeket).dVperdt],2),'k-','LineWidth',vonalvastagsag)
+plot(mean([APwaves(AACezeket).dVperdtT],2),mean([APwaves(AACezeket).dVperdt],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('dV/dt (V/s)')
+subplot(2,2,3);
+hold on
+plot(mean([APwaves(BCezeket).dVperdtV],2),mean([APwaves(BCezeket).dVperdt],2),'k-','LineWidth',vonalvastagsag)
+plot(mean([APwaves(AACezeket).dVperdtV],2),mean([APwaves(AACezeket).dVperdt],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('Vm (V)')
+ylabel('dV/dt (V/s)')
+subplot(2,2,4);
+hold on
+plot(mean([APwaves(BCezeket).ddVperdtT],2),mean([APwaves(BCezeket).ddVperdt],2),'k-','LineWidth',vonalvastagsag)
+plot(mean([APwaves(AACezeket).ddVperdtT],2),mean([APwaves(AACezeket).ddVperdt],2),'r-','LineWidth',vonalvastagsag)
+axis tight
+xlabel('time (s)')
+ylabel('d^2V/dt^2 (V/s^2)')

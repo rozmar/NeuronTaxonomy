@@ -25,7 +25,7 @@ function processRawIvs(listPath,listName,inputDir,outputDir,projectName, clabels
         
         if nargin<6 
             classDir = '/';
-        elseif length(clabels)<=1
+        elseif length(clabels)<1
             classDir = '/';
         else
             classDir = ['/',clabels(cls(j))];

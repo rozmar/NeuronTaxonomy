@@ -9,6 +9,7 @@ function datasum = basic_features(cell,current,time)
         pause
     end
     datasum.RS=mean(RS*10^6);
+    datasum.si=mode(diff(time));
 %     datasum.rsmedian=median(RS*10^6);
     datasum.resting = mean(cell.v0);
     datasum.rheobase = current(cell.rheobase);
@@ -16,11 +17,15 @@ function datasum = basic_features(cell,current,time)
     datasum.tau0_90risetime = mean(cell.tau0_90risetime);
     
     rsagnum=min([sum(current<0),2]);
-    
+    rsagnum=1;
     datasum.sag = cell.rsag(1:rsagnum) ./ rinall(1:rsagnum);
     datasum.sag = nanmean(datasum.sag(1:rsagnum));
     datasum.rin = nanmean(rinall(1:rsagnum));
     datasum.rsag=nanmean(cell.rsag(1:rsagnum));
+    datasum.rebound=cell.dvrebound(1:rsagnum)./cell.dvin(1:rsagnum);
+    datasum.rebound = nanmean(datasum.rebound(1:rsagnum));
+    datasum.rrebound =abs(nanmean(cell.dvrebound(1:rsagnum)./current(1:rsagnum)))* 1000000;
+    datasum.reboundsagratio=datasum.rebound/datasum.sag;
     if ~isempty(cell.rhump)
         datasum.rhump=cell.rhump(end);
         datasum.hump=cell.rhump(end)/rinall(length(cell.rhump));
@@ -33,6 +38,7 @@ function datasum = basic_features(cell,current,time)
     rawdata.apnum=cell.apNums(cell.apNums>0);
     rawdata.threshold=cell.apFeatures(:,featS.thresholdVReal);
     rawdata.apamplitude=cell.apFeatures(:,featS.apAmplitude);
+    rawdata.aprisetime=(cell.apFeatures(:,featS.apMaxPos)-cell.apFeatures(:,featS.thresholdPos))*datasum.si;
     rawdata.aphalfwidth=cell.apFeatures(:,featS.halfWidthLength);
     ahpV=cell.apFeatures(:,featS.ahpV)+dvrs(cell.apFeatures(:,1));
     apEndV=(cell.apFeatures(:,featS.apEndV)+dvrs(cell.apFeatures(:,1)));

@@ -44,6 +44,7 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 	for i=1:size(hasAPY,1)
 		y = hasAPY(i,:);		%current IV
 		diffy = diff(y)./diff(x);		%differentials
+        ddiffy = diff(diffy)./diff(x(1:end-1));		%differentials
 		%dy = calcDerivativeInPoint(y,(1/((x(2)-x(1)))));	%derivatives in points
 		dy = mean([ 0 diffy ; diffy 0 ]);
 		yav = mean([y(2:end);y(1:end-1)]);	%average values at differentials
@@ -65,7 +66,7 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 				apRow = [ sweepID(i) apMax currentAPmaskMaxPos ];
 					
 				thresholdFeatures = findThreshold(currentAPmaskMaxPos,y,dy);	%find the threshold features
-				thresholdFeatures5 = [ thresholdFeatures5 ; findThreshold(currentAPmaskMaxPos,y,dy,5) ];	%find the threshold features
+				thresholdFeatures5 = [ thresholdFeatures5 ; findThreshold(currentAPmaskMaxPos,y,dy,50) ];	%find the threshold features
 
 				apEndFeatures = findApEnd(currentAPmaskMaxPos,y,dy);
 				apEndFeatures5 = [ apEndFeatures5 ; findApEnd(currentAPmaskMaxPos,y,dy,20) ];
@@ -77,6 +78,7 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 				apRow = [ apRow thresholdFeatures apEndFeatures halfwidthFeatures apAmplitude ];
 												
 				apDiff = diffy(thresholdFeatures(1)-3:apEndFeatures(1)+3);
+                apDDiff = ddiffy(thresholdFeatures(1)-3:apEndFeatures(1)+3);
 				
 				dvMaxLength = find(apDiff==max(apDiff),1,'first');
 				dvMinLength = find(apDiff==min(apDiff),1,'first');
@@ -94,7 +96,7 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 				dvMinT = xav(dvMinPos);
 
 				apRow = [ apRow dvMaxPos dvMax dvMaxV dvMaxT dvMinPos dvMin dvMinV dvMinT ];				
-		
+     
 			end
 			apFeatures = [ apFeatures ; apRow ];
         end

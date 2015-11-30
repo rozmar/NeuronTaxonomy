@@ -172,8 +172,11 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 					dv090 = yahp(ahp+pos90)-yahp(ahp);	%the real 90% value
 				
 					dt = pos90;		%difference in time
-					line = [ yahp(ahp):(dv090/dt):yahp(ahp+pos90)  ];	%line between the two point
-							
+					line = [ yahp(ahp):(dv090/(dt)):yahp(ahp+pos90)  ];	%line between the two point
+					if length(line)<length(yahp(ahp:ahp+pos90)) % kókányolás.. valamiért néha rövidebb a line változó.. bocsi az igénytelenségért
+                        line=[line,line(end)];
+                    end
+                    
 					differ = yahp(ahp:ahp+pos90)-line;	%calculate the difference between the line and the iv
 						
 					concavitymin = [ concavitymin ; min(differ) ];
