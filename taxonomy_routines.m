@@ -2,8 +2,8 @@
 close all
 clear all
 
-ivpercell='N';
-savetheIV=1;
+ivpercell=1;%'all the IVs'; % the first (ivpercell) IVs will be used for each cell if the (ivpercell) variable is numeric. All the IVs will be used if this variable is not numeric.
+savetheIV=1; %the processed IV-s are saved (in separate directories) when ==1
 
 locations=marcicucca_locations;
 defPath=[locations.tgtardir,'MATLABdata/IV'];
@@ -46,55 +46,55 @@ projects(8).listName='humanAAC.txt';
 projects(8).xlsname='humanAAC.xls';
 
 
-[Selection,ok]=listdlg('ListString',{projects.Name},'ListSize',[300 600]); 
+[Selection,ok]=listdlg('ListString',{projects.Name},'ListSize',[300 600]);
 
 listPath=projects(Selection).listPath;
 listName=projects(Selection).listName;
 xlsname=projects(Selection).xlsname;
 
-taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell)
-    
+taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell)% the class can be only one character!
+
 %% locating files
 datasumDir=[listPath,'/datasums'];
 featDir=[listPath,'/datafiles'];
 ivdir=[listPath,'/IVs'];
 projectName=[];
-[cls, ~, ~, ~] = readInFileList(listPath,listName);
-cls=num2str(unique(cls));
+[cls, ~, ~, ~] = readInFileList(listPath,listName);% the class can be only one character!
+cls=num2str(unique(cls));% the class can be only one character!
 if size(cls,1)>size(cls,2)
     cls=cls';
 end
-cls(strfind(cls,' '))=[];
+cls(strfind(cls,' '))=[];% the class can be only one character!
 clabels=cls;
 [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
 inputDir=paths;
 %% extracting features
 button = questdlg('Would you like to export raw IVs?','raw export','yes','no','yes');
 if strcmp(button,'yes')
-%     if isempty(clabels)
-%         delete([featDir,'/*.mat']);
-%     else
-%         for i=1:length(clabels)
-%             delete([featDir,'/',clabels(i),'/*.mat']);
-%         end
-%     end
+    %     if isempty(clabels)
+    %         delete([featDir,'/*.mat']);
+    %     else
+    %         for i=1:length(clabels)
+    %             delete([featDir,'/',clabels(i),'/*.mat']);
+    %         end
+    %     end
     processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
 end
 %% collecting specified features
 button = questdlg('Would you like to collect features?','collect features','yes','no','yes');
 if strcmp(button,'yes')
     if isempty(clabels)
-%         delete([datasumDir,'/*.mat']);
+        %         delete([datasumDir,'/*.mat']);
         i=1;
         collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels);
     else
         for i=1:length(clabels)
-%             delete([datasumDir,'/',clabels(i),'/*.mat']);
+            %             delete([datasumDir,'/',clabels(i),'/*.mat']);
             collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels(i));
         end
     end
 end
-%%
+%% generating DATASUM exporting IV files if needed
 DATASUM=struct;
 if isempty(clabels)
     hossz=1;
@@ -138,19 +138,19 @@ for i=1:hossz
                 save([ivdir,'/',clabels(i),'/',datasum.fname,'.mat'],'iv');
             end
             
-%             figure(1)
-%             clf
-%             plot(iv.time,iv.v1)
-%             hold on
-%             plot(iv.time,iv.(['v',num2str(iv.sweepnum)]))
-%             title(datasum.fname)
-%             axis tight
-%                     pause
+            %             figure(1)
+            %             clf
+            %             plot(iv.time,iv.v1)
+            %             hold on
+            %             plot(iv.time,iv.(['v',num2str(iv.sweepnum)]))
+            %             title(datasum.fname)
+            %             axis tight
+            %                     pause
         end
     end
 end
 
-%% xls-be kiírás és statisztika
+%% statistics and writing data to xls file
 [locations]=marcicucca_locations;
 
 path=[locations.matlabstuffdir,'NotMine/20130227_xlwrite/'];
@@ -181,7 +181,7 @@ for fieldnum=1:length(fieldek)
     datamatrix(fieldnum,:)=[DATASUM.(fieldek{fieldnum})];
     %hm
     if any(strcmp(fieldek,'class'))
-%         adatok=clear;
+        %         adatok=clear;
         classfieldnum=find(strcmp(fieldek,'class'));
         classes=[DATASUM.class];
         uniqueclasses=unique(classes);
@@ -189,7 +189,7 @@ for fieldnum=1:length(fieldek)
         if classnum>1
             datforstat=struct;
             for classi=1:classnum
-%                 classidx=strfind(classes,uniqueclasses(classi)); %?????
+                %                 classidx=strfind(classes,uniqueclasses(classi)); %?????
                 classidx=classes==uniqueclasses(classi);
                 datforstat(classi).data=datamatrix(fieldnum,classidx);
                 datforstat(classi).data(isnan(datforstat(classi).data))=[];
@@ -229,12 +229,12 @@ for fieldnum=1:length(fieldek)
                     statheader=[statheader,{['average value for ',num2str(uniqueclasses(firstclassi))],['average value for ',num2str(uniqueclasses(secondclassi))],['lilliefors p for ',num2str(uniqueclasses(firstclassi))],['lilliefors p for ',num2str(uniqueclasses(secondclassi))],['t test ',constantstring],['wilcoxon test ',constantstring]}];
                 end
             end
-          statmatrix(fieldnum,:)=statrow;
+            statmatrix(fieldnum,:)=statrow;
         end
-    end   
+    end
 end
 if classnum>1
-%     fieldek=[fieldek;statheader'];
+    %     fieldek=[fieldek;statheader'];
     fnames=[fnames,statheader];
     datamatrix=[datamatrix,statmatrix];
 end
@@ -243,7 +243,7 @@ end
 % % % Zbetuszam=str2num('Z');
 % % % endbetu
 % % % while oszlopszam/Abetszam>1
-% % %     
+% % %
 % % % elsobetu=char(floor(oszlopszam/Abetszam)+'A');
 % % % masodikbetu=char(oszlopszam-floor(oszlopszam/Abetszam)+'A');
 
@@ -279,9 +279,9 @@ for fieldnum=1:length(fieldek)
         datanow(i).data=toplot;
     end
     figure(2)
-        clf
-        plot([DATASUM.class],alldata,'ko')
-        xlim([0 5])
+    clf
+    plot([DATASUM.class],alldata,'ko')
+    xlim([0 5])
     [p,h]=ranksum(datanow(1).data,datanow(2).data,.001);
     if h==1
         disp(p)
@@ -290,14 +290,14 @@ for fieldnum=1:length(fieldek)
             princompps(length(princompps)+1)=p;
             princompnames{length(princompnames)+1}=fieldek{fieldnum}
         end
-%         pause
+        %         pause
     end
 end
 
 %% principal component analysis
 mergecorrelatingvals=1;
 corrpval=.01;
-count=6;   
+count=6;
 
 [princomppsnew,IX]=sort(princompps);
 princompmatrixnew=princompmatrix(:,IX);
@@ -329,14 +329,14 @@ if mergecorrelatingvals==1
     end
     if length(princompnamesnew)==1
         mergeidx=1;
-       princompnamesnewnew=[princompnamesnewnew,{[princompnamesnew{mergeidx}]}];
+        princompnamesnewnew=[princompnamesnewnew,{[princompnamesnew{mergeidx}]}];
         princompnamesnew(mergeidx)=[];
         princompmatrixnewnew=[princompmatrixnewnew,princompmatrixnew(:,mergeidx(1))];
         princompmatrixnew(:,mergeidx)=[];
     end
     
-princompmatrixnew=princompmatrixnewnew;
-princompnamesnew=princompnamesnewnew;
+    princompmatrixnew=princompmatrixnewnew;
+    princompnamesnew=princompnamesnewnew;
 end
 
 
@@ -462,7 +462,7 @@ for i=1:length(finames)
         plot(isidatanow,datanow,'o')
         xlabel('ISI (s)')
         ylabel(finame)
-    end 
+    end
 end
 %% MG Human AAC SAG/REBOUND cucc
 close all
@@ -484,29 +484,29 @@ ylim([0 10])
 
 butt=1
 while butt==1
-figure(2)
-plot([DATASUM.sag],[DATASUM.rebound],'ko')
-hold on
-xlim([.9,2])
-ylim([.9,2])
-plot([0,2],[0,2],'k-','LineWidth',2)
-[x,y,butt]=ginput(1);
-clf
-plot([DATASUM.sag],[DATASUM.rebound],'ko')
-hold on
-xlim([.9,2])
-ylim([.9,2])
-plot([0,2],[0,2],'k-','LineWidth',2)
-difs=abs([DATASUM.sag]-x)+abs([DATASUM.rebound]-y);
-[~,ezkell]=min(difs);
-plot([DATASUM(ezkell).sag],[DATASUM(ezkell).rebound],'ro','MarkerFaceColor',[1 0 0])
-figure(22)
-clf
-plot(DATASUM(ezkell).iv.time,DATASUM(ezkell).iv.v1,'k-')
-% hold on
-% plot(DATASUM(ezkell).iv.time,DATASUM(ezkell).iv.v2,'k-')
-title(num2str(ezkell))
-title(num2str(DATASUM(ezkell).ID))
+    figure(2)
+    plot([DATASUM.sag],[DATASUM.rebound],'ko')
+    hold on
+    xlim([.9,2])
+    ylim([.9,2])
+    plot([0,2],[0,2],'k-','LineWidth',2)
+    [x,y,butt]=ginput(1);
+    clf
+    plot([DATASUM.sag],[DATASUM.rebound],'ko')
+    hold on
+    xlim([.9,2])
+    ylim([.9,2])
+    plot([0,2],[0,2],'k-','LineWidth',2)
+    difs=abs([DATASUM.sag]-x)+abs([DATASUM.rebound]-y);
+    [~,ezkell]=min(difs);
+    plot([DATASUM(ezkell).sag],[DATASUM(ezkell).rebound],'ro','MarkerFaceColor',[1 0 0])
+    figure(22)
+    clf
+    plot(DATASUM(ezkell).iv.time,DATASUM(ezkell).iv.v1,'k-')
+    % hold on
+    % plot(DATASUM(ezkell).iv.time,DATASUM(ezkell).iv.v2,'k-')
+    title(num2str(ezkell))
+    title(num2str(DATASUM(ezkell).ID))
 end
 %% cutting out APs, plotting variables
 load([locations.taxonomy.fetureextractorlocation,'/apFeatures.mat'],'featS');
@@ -532,25 +532,25 @@ for celli=1:length(DATASUM)
     for i=1:length(appercell)
         api=appercell(i);
         if api<=length(sweepnum)
-        APwaves(celli).V(:,i)=DATASUM(celli).iv.(['v',num2str(sweepnum(api))])(zeroh(api)-stepback:zeroh(api)+stepforward)+cellStruct.dvrs(sweepnum(api));
-        APwaves(celli).t(:,i)=[-stepback*si:si:stepforward*si];
-        APwaves(celli).dVperdt=diff(moving(APwaves(celli).V(:,i),dvperdtmovingaverage))/si;
-        APwaves(celli).dVperdtT=mean([APwaves(celli).t(1:end-1,i),APwaves(celli).t(2:end,i)],2);
-        APwaves(celli).dVperdtV=mean([APwaves(celli).V(1:end-1,i),APwaves(celli).V(2:end,i)],2);
-        
-        APwaves(celli).ddVperdt=diff(APwaves(celli).dVperdt(:,i))/si;
-        APwaves(celli).ddVperdtT=mean([APwaves(celli).dVperdtT(1:end-1,i),APwaves(celli).dVperdtT(2:end,i)],2);
-        APwaves(celli).ddVperdtV=mean([APwaves(celli).dVperdtV(1:end-1,i),APwaves(celli).dVperdtV(2:end,i)],2);
-        
-        
-        if DATASUM(celli).class<3
-            subplot(2,2, (DATASUM(celli).class-1)*2+1)
-            hold all
-            plot([APwaves(celli).t],[APwaves(celli).V])
-            subplot(2,2,DATASUM(celli).class*2)
-            hold all
-            plot([APwaves(celli).dVperdtT],[APwaves(celli).dVperdt])
-        end
+            APwaves(celli).V(:,i)=DATASUM(celli).iv.(['v',num2str(sweepnum(api))])(zeroh(api)-stepback:zeroh(api)+stepforward)+cellStruct.dvrs(sweepnum(api));
+            APwaves(celli).t(:,i)=[-stepback*si:si:stepforward*si];
+            APwaves(celli).dVperdt=diff(moving(APwaves(celli).V(:,i),dvperdtmovingaverage))/si;
+            APwaves(celli).dVperdtT=mean([APwaves(celli).t(1:end-1,i),APwaves(celli).t(2:end,i)],2);
+            APwaves(celli).dVperdtV=mean([APwaves(celli).V(1:end-1,i),APwaves(celli).V(2:end,i)],2);
+            
+            APwaves(celli).ddVperdt=diff(APwaves(celli).dVperdt(:,i))/si;
+            APwaves(celli).ddVperdtT=mean([APwaves(celli).dVperdtT(1:end-1,i),APwaves(celli).dVperdtT(2:end,i)],2);
+            APwaves(celli).ddVperdtV=mean([APwaves(celli).dVperdtV(1:end-1,i),APwaves(celli).dVperdtV(2:end,i)],2);
+            
+            
+            if DATASUM(celli).class<3
+                subplot(2,2, (DATASUM(celli).class-1)*2+1)
+                hold all
+                plot([APwaves(celli).t],[APwaves(celli).V])
+                subplot(2,2,DATASUM(celli).class*2)
+                hold all
+                plot([APwaves(celli).dVperdtT],[APwaves(celli).dVperdt])
+            end
         end
     end
 end

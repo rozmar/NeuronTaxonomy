@@ -91,8 +91,8 @@ for i=1:size(raw,1);
     end
     idxestodo=idxestodo&cidxes;
     
-    if ivpercell==1
-        eddig=1;
+    if isnumeric(ivpercell)
+        eddig=min(ivpercell,length(find(idxestodo)));
     else
         eddig=length(find(idxestodo));
     end
