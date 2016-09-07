@@ -6,9 +6,10 @@ locations=marcicucca_locations;
 [num,txt,raw]=xlsread([listPath,'/',xlsname]);
 a=dir([listPath,'/',listName]);
 if ~isempty(a)
-    delete([listPath,'/',listName])
+    delete([listPath,'/',listName]);
 end
 fileID = fopen([listPath,'/',listName],'w');
+cleaner = onCleanup(@() fclose(fileID));
 for i=1:size(raw,1);
     class=num2str(raw{i,1});
     id=num2str(raw{i,2});
@@ -19,8 +20,16 @@ for i=1:size(raw,1);
     g=num2str(raw{i,4});
     s=(raw{i,5});
     c=num2str(raw{i,6});
-    
+
     fidx=find(strcmp([fname,'.mat'],alltheivdata.fnames),1,'first');
+    
+    if isempty(fidx)
+       fprintf('%s missing\n', fname);
+       continue; 
+    else
+       %fprintf('fidx = %d\n', fidx);
+    end
+    
     iv=load([alltheivdata.paths{fidx},'/',alltheivdata.fnames{fidx}]);
     iv=iv.iv;
     finames=fieldnames(iv);
@@ -34,7 +43,7 @@ for i=1:size(raw,1);
         ss(fieldnum)=str2num(finame(hyps(1)+2:hyps(2)-1));
         cs(fieldnum)=str2num(finame(hyps(2)+2:end));
     end
-    
+
     if strcmp(g,'all')
         gidxes=ones(size(gs));
     elseif strcmp(g,'last')
@@ -43,7 +52,7 @@ for i=1:size(raw,1);
     else
         gidxes=gs==str2num(g);
     end
-    
+
     if ischar(s) && strcmp(s,'all')
         sidxes=ones(size(ss));
     elseif ischar(s) && strcmp(s,'last')
@@ -57,13 +66,13 @@ for i=1:size(raw,1);
             snow=s(vesszok(ii)+1:vesszok(ii+1)-1);
             sidxes=sidxes|ss==str2num(snow);
         end
-        
+
     else
         sidxes=ss==s;
     end
-    
+
     idxestodo=gidxes &sidxes;
-    
+
     if strcmp(c,'onlyone') && length(unique(cs(idxestodo)))==1
         cidxes=ones(size(cs));
     elseif length(c)==1
@@ -90,7 +99,7 @@ for i=1:size(raw,1);
         cidxes=cs==uniquechannels(idx);
     end
     idxestodo=idxestodo&cidxes;
-    
+
     if isnumeric(ivpercell)
         eddig=min(ivpercell,length(find(idxestodo)));
     else
@@ -103,8 +112,10 @@ for i=1:size(raw,1);
         cnow=num2str(cs(findexes(iii)));
         fprintf(fileID,'\n%s %s %s %s %s %s',class,id,fname,gnow,snow,cnow);
     end
-    
+
 end
 
-fclose(fileID);
+%fclose(fileID);
+
+    
 end

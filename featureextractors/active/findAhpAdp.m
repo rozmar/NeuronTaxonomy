@@ -1,7 +1,7 @@
 %
 %
 %
-function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090 ] = findAhpAdp(x,Y,taustart,pulseend,apNums,current,sampleInterval,threshold,apend)
+function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090 ] = findAhpAdp(time,Y,taustart,pulseend,apNums,current,sampleInterval,threshold,apend)
 
 	AHP = [];
 	ADP = [];
@@ -13,41 +13,70 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 	concavitystd = [];
 	searchslowevents=0;
 		
-	x = x(taustart:pulseend);
-	firedY = Y(find(apNums>0),taustart:pulseend);
+    % Time of stimulation
+	time = time(taustart:pulseend);
+    % IV during stimulation
+	firedY = Y((apNums>0),taustart:pulseend);
+    % Number of AP where has been any
 	firedApNum = apNums(apNums>0);
+    % Sweep number
 	sweeps=unique(threshold(:,1));
     
-	for i=1:size(sweeps,1)
+    nFiringSweep = length(sweeps);
+    
+    % Loop through each sweep
+	for i= 1 : nFiringSweep
+        
+        % current sweep
 		y = firedY(i,:);
-		h = fspecial('average', [1 round(.001/sampleInterval)]);
+        
+        % Filter signal for AHP search
+		h = fspecial('average', [1 round(.002/sampleInterval)]);
 		yahp= imfilter(y,h);
+        
+        if sweeps(i)==20
+%           figure;
+%           plot(time, [diff(yahp),0]);
+          %figure;
+          %plot(time, yahp); 
+          %plot(yahp); 
+        end
 		
+        % Filter signal for slow AHP search
 		h = fspecial('average', [1 round(.005/sampleInterval)]);
 		yahpslow= imfilter(y,h);
-		%stepSize = round(0.002 / sampleInterval);
-        stepSize = 1;
+        
+		stepSize = round(0.001 / sampleInterval);
+%         stepSize = 1;
 				
-		sweepAPThreshold = threshold(find(threshold(:,1)==sweeps(i)),2);			
-		sweepAPApend = apend(find(apend(:,1)==sweeps(i)),2);    
+        % Get current thresholds and AP ends
+		sweepAPThreshold = threshold((threshold(:,1)==sweeps(i)),2);			
+		sweepAPApend = apend((apend(:,1)==sweeps(i)),2);    
             
-		for j=1:firedApNum(i)
-			if j==firedApNum(i)
-				endPos = length(y)-(stepSize*2);
+        dy = mean([0 diff(yahp); diff(yahp) 0 ], 1);
+        
+        % Loop through each AP
+		for j = 1 : firedApNum(i)
+            
+            % Start search from AP end
+			ahpStart = sweepAPApend(j) - taustart;            
+            
+            % Search end will be the the next threshold, 
+            % or the end of the recording
+            if j == firedApNum(i)
+				endPos = length(y);
             else
-				endPos = sweepAPThreshold(j+1)-taustart-(2*stepSize);
-				while endPos<5
-					endPos=endPos+stepSize;
-				end
-			end
-			stepSize = 1;			
-			ahpStart = sweepAPApend(j)-taustart;
-			             
-			if ahpStart>endPos
+				endPos = sweepAPThreshold(j+1) - taustart;
+            end
+            endPos = max(endPos -(stepSize*2),5);
+                        
+% 			stepSize = 1;	
+            			             
+            if ahpStart>endPos
 				ahpStart=endPos;
             end
 			
-			ahp = ahpStart;
+% 			ahp = ahpStart;
             
 %             figure; clf;
 %             hold on;
@@ -63,11 +92,11 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 			%ahp = ahpStart + find(y(ahpStart:ahp)==min(y(ahpStart:ahp)),1,'first');
 			
             %plot(x(ahp),yahp(ahp),'ro','linewidth',1,'markerfacecolor','r');
-                  
-            ahp = find(y(ahpStart:endPos)==min(y(ahpStart:endPos)),1,'first');
-            
-            ahp = ahp + ahpStart;
-            
+                 
+            % AHP will be the first local minimum after the AP end
+            %ahp = find(y(ahpStart:endPos)==min(y(ahpStart:endPos)),1,'first') + ahpStart;
+            [~, ahp] = min(yahp(ahpStart:endPos));
+            ahp = ahpStart + ahp;
             
 			adp = ahp + 1;
             
@@ -77,19 +106,44 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 			%secStep = (adp<endPos-stepSize) && (adp<endPos-2*stepSize) && (yahp(adp+2*stepSize)>yahp(adp));
 			%thirdStep = (adp<endPos-stepSize) && (adp<endPos-3*stepSize) && (yahp(adp+3*stepSize)>yahp(adp));
 			
+            % Differential in each point
             
-            if (adp<endPos-stepSize)
-                nextStep = (yahp(adp+stepSize)>yahp(adp));
-                secStep = (adp<endPos-2*stepSize) && (yahp(adp+2*stepSize)>yahp(adp));
-                thirdStep = (adp<endPos-3*stepSize) && (yahp(adp+3*stepSize)>yahp(adp));
-                while (adp<endPos-stepSize) & (nextStep || secStep || thirdStep)
-                    adp=adp+stepSize;
-                    nextStep = (yahp(adp+stepSize)>yahp(adp));
-                    secStep = (adp<endPos-2*stepSize) && (yahp(adp+2*stepSize)>yahp(adp));
-                    thirdStep = (adp<endPos-3*stepSize) && (yahp(adp+3*stepSize)>yahp(adp));
+            % Go while the next 3 consecutive point is 
+            
+%             nextStep = (yahp(adp+stepSize)>yahp(adp)) && (adp < (endPos-stepSize));
+%             secStep = (adp<endPos-2*stepSize) && (yahp(adp+2*stepSize)>yahp(adp));
+%             thirdStep = (adp<endPos-3*stepSize) && (yahp(adp+3*stepSize)>yahp(adp));
+%             while (adp<endPos-stepSize) & (nextStep || secStep || thirdStep)
+%                 adp=adp+stepSize;
+%                 nextStep = (yahp(adp+stepSize)>yahp(adp));
+%                 secStep = (adp<endPos-2*stepSize) && (yahp(adp+2*stepSize)>yahp(adp));
+%                 thirdStep = (adp<endPos-3*stepSize) && (yahp(adp+3*stepSize)>yahp(adp));
+%             end
+
+           
+            
+            sectionY = yahp(adp:endPos);
+            sectionDy = dy(adp:endPos);
+            sind = 1;
+            
+            upwardMove = sum(sectionDy(sind:min(length(sectionDy),sind+1*stepSize)));
+            while (sind<length(sectionDy))
+                
+                if sweeps(i)==20
+                  scatter(sind+ahp+1, sectionY(sind), 'r');
                 end
+                
+                upwardMove = sum(sectionDy(sind:min(length(sectionDy),sind+1*stepSize)));
+                sind = sind + stepSize;
+                
+                if (upwardMove<=0)
+                    break;
+                end
+                
+                
             end
-				
+            
+			adp = sind + ahp + 1;	
 			%adp=adp+stepSize;
 			adp=ahp + find(y(ahp:adp)==max(y(ahp:adp)) ,1,'first')-1;
 				
@@ -118,8 +172,8 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 				ahpslow=min([ahpslow,endPos]);
 				adpslow=min([adpslow,endPos]);
 			end
-			AHP = [ AHP ; ahp y(ahp) x(ahp) ];
-			ADP = [ ADP ; adp y(adp) x(adp) ];
+			AHP = [ AHP ; ahp y(ahp) time(ahp) ];
+			ADP = [ ADP ; adp y(adp) time(adp) ];
 								
 			%examine all ap except the last - this step was discarded with
 			%a '='
@@ -156,7 +210,7 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 				if isnan(pos5)		
 					ahp05= [ ahp05 ; sweeps(i) NaN ];
 				else 
-					ahp05= [ ahp05 ; sweeps(i) x(ahp+pos5)-x(ahp) ];
+					ahp05= [ ahp05 ; sweeps(i) time(ahp+pos5)-time(ahp) ];
 				end
 				
 				if isnan(pos90)
@@ -167,7 +221,7 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 					
 					ahp090 = [ ahp090 ; sweeps(i) NaN ];
 				else
-					ahp090= [ ahp090 ; sweeps(i) x(ahp+pos90)-x(ahp) ];
+					ahp090= [ ahp090 ; sweeps(i) time(ahp+pos90)-time(ahp) ];
 
 					dv090 = yahp(ahp+pos90)-yahp(ahp);	%the real 90% value
 				
@@ -184,14 +238,23 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 					concavity = [ concavity ; mean(differ) ];
 					concavitystd = [ concavitystd ; std(differ) ];
 				end
-			end
+            end
+            
+            if sweeps(i)==20
+%                 hold on;
+%                 
+%                 scatter(time(AHP(end,1)), y(AHP(end,1)), 'r');
+                scatter((ADP(end,1)), y(ADP(end,1)), 'g');
+%                 hold off;
+            
+            end
 			
-		end
+        end
 		
-		
-
-	end
+    end
+    
 	AHP(:,1)=AHP(:,1)+taustart;
 	ADP(:,1)=ADP(:,1)+taustart;
+    
 end
 

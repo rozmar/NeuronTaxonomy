@@ -45,7 +45,6 @@ projects(8).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_AAC
 projects(8).listName='humanAAC.txt';
 projects(8).xlsname='humanAAC.xls';
 
-
 [Selection,ok]=listdlg('ListString',{projects.Name},'ListSize',[300 600]);
 
 listPath=projects(Selection).listPath;

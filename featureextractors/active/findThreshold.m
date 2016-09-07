@@ -1,36 +1,49 @@
 %
 % Returns the following values:
 % threshold thresholdV threshCorrector threshVCorrected
-function thresholdFeatures = findThreshold(startpos,iv,derivative,thresholdValue)
-	
+function thresholdFeatures = findThreshold(startpos,iv,derivative,thresholdValue, SI)
+
 	thresholdFeatures = [];		%collector of the features
 	
 	if nargin < 4
 		%at which derivative find AP
 		thresholdValue = 10;
-	end
-				
-	%go below 20mV
-	th = find(iv(1:startpos)<0.02,1,'last');
+    end
+	
+    % Old method: find dvMax from the AP max
+    if nargin<5
+	  %go below 20mV
+	  th = find(iv(1:startpos)<0.02,1,'last');
 		
-	if size(th,2)==0
-		th = startpos-1;
-	end
+	  if size(th,2)==0
+	  	th = startpos-1;
+      end
 	
-	%don't start too early
-	if th<5
-		th=5;
-	end
+	  %don't start too early
+	  if th<5
+  		th=5;
+      end
 
-	%find the maximal derivative
-	[t tPos]=max(derivative(th-3:startpos-2));		%ezt átírni paraméteresre
+	  %find the maximal derivative
+	  [t tPos]=max(derivative(th-3:startpos-2));		%ezt átírni paraméteresre
 	
-	threshold = th -3 + tPos;
+	  threshold = th -3 + tPos;
+      
+    % Newer method: find dvMax
+    else
+      % We look back 2ms
+      stepSize = round(2e-3/SI);
+      if stepSize>=startpos
+        stepSize = startpos-1; 
+      end
+      [~,threshold] = max(derivative(startpos+(-stepSize:0)));
+      threshold = threshold + startpos - stepSize;
+    end
 
 	threshold=find(derivative(1:threshold)<=thresholdValue,1,'last')+1;	%find the derivative where smaller than thresholdValue
 	
 	if size(threshold,2)==0
-		threshold = th + tPos - 2;	
+	  threshold = th + tPos - 2;	
 	end
 	
 	%don't start too early	

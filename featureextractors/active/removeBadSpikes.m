@@ -1,44 +1,69 @@
 function [ apFeatures apNums ] = removeBadSpikes(apFeats,apNums)
-	apFeatures = [];
-	if size(apFeats,1)==0
-		return;
-	end
-	sweeps = unique(apFeats(:,1));
-	for i=1:length(sweeps)
-		sweepspikes = apFeats(find(apFeats(:,1)==sweeps(i)),:);
+
+  apFeatures = [];
+    
+  if size(apFeats,1)==0
+    return;
+  end
+    
+  sweepNumber  = unique(apFeats(:,1));
+  nSweeps      = length(sweepNumber);
+  
+  for i = 1 : nSweeps
+    thisSweepNumber = sweepNumber(i);
+    thisSweepIdx    = (apFeats(:,1)==thisSweepNumber);
+    nSpikeInSweep   = sum(thisSweepIdx);
+    thisSweepSpikes = apFeats(thisSweepIdx,:);
+        
+%     if thisSweepSpikes(1,1)==20
+%       hold on;
+%       scatter(thisSweepSpikes(:,4), thisSweepSpikes(:,5), 'r', 'filled');
+%       hold off;
+%     end
 				
-		toRemove = [];
+	toRemove = false(nSpikeInSweep,1);
         
-		for j=1:size(sweepspikes,1)
-			f=sweepspikes(j,:);
-			if (f(15)<0.05) || (f(15)>20) || (isnan(f(15))) || (f(16)<10) || (f(16)>200)
-				%disp(["halfWidth ",num2str(f(15))]);
-				%disp(["amplitude ",num2str(f(16))]);
-				toRemove = [ toRemove j ];
-            end
+    for j = 1 : nSpikeInSweep
+	  thisSpike    = thisSweepSpikes(j,:);
+      
+      if (thisSpike(15)<0.05)||(thisSpike(15)>20)||(isnan(thisSpike(15)))
+        fprintf('Half-width out of range: %f', thisSpike(15)); 
+        toRemove(j) = true;
+      end
+      
+      if (thisSpike(16)<10)||(thisSpike(16)>200)
+        if thisSpike(1)==20
+          hold on;
+          plot(thisSpike(4), thisSpike(5), 'kx', 'linewidth', 2, 'markersize', 10);
+          hold off;
+        end
+        
+        fprintf('Amplitude out of range: %f\n', thisSpike(16));
+      end
             
+      % Spike with the same threshold time will be noise
+      repeatingSpike = find(thisSweepSpikes(j+1:end,4)==thisSpike(4));
+      if ~isempty(repeatingSpike)
+        repeatingSpike = repeatingSpike + ones(size(repeatingSpike,1),1)*j;
+        toRemove(repeatingSpike) = true;
+      end
             
-            repeatingSpike = find(sweepspikes(j+1:end,4)==f(4));
-            if ~isempty(repeatingSpike)
-                repeatingSpike = repeatingSpike + ones(size(repeatingSpike,1),1)*j;
-                toRemove = [ toRemove repeatingSpike' ];
-            end
-            
-		end
-		
-		
+    end
 						
-		if length(toRemove)>100
-			toRemove = [ (1:1:size(sweepspikes)) ];
-		end
-		
-		sweepspikes(toRemove,:) = [];
-															
-		if ( size(sweepspikes,1)>400 ) 
-			sweepspikes(find(sweepspikes(:,1)==sweeps(i)),:)=[];	
-        end  
-        
-		apFeatures = [ apFeatures ; sweepspikes ];
-		apNums(sweeps(i))=size(sweepspikes,1);
+    % If too many spikes have to be removed, all
+    % spike will be removed
+	if length(toRemove)>100
+	  toRemove = true(nSpikeInSweep,1);
 	end
+		
+	thisSweepSpikes(toRemove,:) = [];
+						
+    % If too many spikes left,  remove everything
+    if ( size(thisSweepSpikes,1)>400 ) 
+	  thisSweepSpikes((thisSweepSpikes(:,1)==thisSweepNumber),:)=[];	
+    end  
+        
+	apFeatures = [ apFeatures ; thisSweepSpikes ];
+	apNums(thisSweepNumber)=size(thisSweepSpikes,1);
+  end
 end

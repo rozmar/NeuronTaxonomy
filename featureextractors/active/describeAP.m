@@ -30,7 +30,7 @@
 %  - dvMin dvMinV dvMinT
 function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 	xold = x;
-	sampleInterval = x(2)-x(1);
+	SI = x(2)-x(1);
 	apFeatures = [];
 	thresholdFeatures5 = [];
 	apEndFeatures5 = [];
@@ -50,7 +50,8 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 		yav = mean([y(2:end);y(1:end-1)]);	%average values at differentials
 		xav=mean([x(2:end);x(1:end-1)]);	%average values at differentials
         apstodel=zeros(hasAPNums(i),1);
-		for j=1:hasAPNums(i)		
+        
+		for j= 1 : hasAPNums(i)		
 			ap = y(hasAPMasks(i,:)==j);
 			apx = x(hasAPMasks(i,:)==j);
 			apMax = max(ap);
@@ -64,8 +65,8 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 % 				hasAPNums(i)=hasAPNums(i)-1;
 			elseif currentAPmaskMaxPos>=5
 				apRow = [ sweepID(i) apMax currentAPmaskMaxPos ];
-					
-				thresholdFeatures = findThreshold(currentAPmaskMaxPos,y,dy);	%find the threshold features
+				   
+				thresholdFeatures = findThreshold(currentAPmaskMaxPos,y,dy,10,SI);	%find the threshold features
 				thresholdFeatures5 = [ thresholdFeatures5 ; findThreshold(currentAPmaskMaxPos,y,dy,50) ];	%find the threshold features
 
 				apEndFeatures = findApEnd(currentAPmaskMaxPos,y,dy);
@@ -101,6 +102,7 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 			apFeatures = [ apFeatures ; apRow ];
         end
         apNums((sweepID(i)))=apNums((sweepID(i)))-sum(apstodel);
+        
 	end
 	if size(apFeatures,2)==0
 	  return;
@@ -112,26 +114,27 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 	apFeatures = [ apFeatures thresholdFeatures5 apEndFeatures5 ];
 	
 	plotAP=0;
-	if plotAP==1
-		%Plot AP features by AP
-		%for i=1:size(apFeatures,1)
-			i=3;
+    if plotAP==1
+	  %Plot AP features by AP
+      desiredAP = apFeatures(:,1)==20;
+      apToPlot = apFeatures(desiredAP,:);
+	  for i=1:size(apToPlot,1)
 			figure(i);
 			clf;
 			hold on;
-			plot(xold,Y(apFeatures(i,1),:),'b-','linewidth',5);
-			plot(xold(apFeatures(i,4)),apFeatures(i,7),'ro','markerfacecolor','r');
+			plot(xold,Y(apToPlot(i,1),:),'b-','linewidth',5);
+			plot(xold(apToPlot(i,4)),apToPlot(i,7),'ro','markerfacecolor','r');
 			%plot(xold(thresholdFeatures5(i,1)),thresholdFeatures5(i,4),'g@');
-			plot(xold(apFeatures(i,3)),apFeatures(i,2),'go','markerfacecolor','g');
-			plot(xold(apFeatures(i,8)),apFeatures(i,9),'ko','markerfacecolor','k');
+			plot(xold(apToPlot(i,3)),apToPlot(i,2),'go','markerfacecolor','g');
+			plot(xold(apToPlot(i,8)),apToPlot(i,9),'ko','markerfacecolor','k');
 			%plot(xold(apEndFeatures5(i,1)),apEndFeatures5(i,4),'r@');
 			%plot(apFeatures(i,12),apFeatures(i,13),'ro');
 			%plot(apFeatures(i,14),apFeatures(i,13),'ro');
-			plot(apFeatures(i,20),apFeatures(i,19),'k^','markerfacecolor','k');
-			plot(apFeatures(i,24),apFeatures(i,23),'kv','markerfacecolor','k');
-			xlim([xold(apFeatures(i,4)-5) xold(apFeatures(i,8)+5)]);
+			plot(apToPlot(i,20),apToPlot(i,19),'k^','markerfacecolor','k');
+			plot(apToPlot(i,24),apToPlot(i,23),'kv','markerfacecolor','k');
+			xlim([xold(apToPlot(i,4)-5) xold(apToPlot(i,8)+5)]);
 			hold off;		
-		%end
+		end
     end
     
 %     apFeatures =[apFeatures thresholdFeatures5 apEndFeatures5];
