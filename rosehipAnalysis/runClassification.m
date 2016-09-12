@@ -134,9 +134,25 @@ function runClassification(parameters)
     n = n + 1;
   end
   delete(plotElement(2:end));
-  legend({'First group','Second group', 'Unknown group', 'Separating line'});
-  hold on;
+  xlabel(feature{1});
+  ylabel(feature{2});
+  legend({'Separating line', 'First group','Second group', 'Unknown group'});
+  hold off;
   %% -------------------------
+  
+  newLineX = (inputdlg('Value:', 'New separating line', 1));
+  newLineX = str2double(newLineX{1});
+  hold on;
+  plot([1,1]*newLineX, ylim, 'k-', 'linewidth', 3);
+  hold off;
+ 
+  allClassIDX = svmclassify(modell, dataMatrix);
+  classVector1 = (allClassIDX==1);
+  classVector2 = (dataMatrix(:,1)>newLineX);
+  classVector  = classVector1&classVector2;
+  classifiedVector = ones(size(classVector)).*2;
+  classifiedVector(classVector) = 1;
+  classifiedVector(~nonNan) = NaN;
   
   %% -------------------------
   %  Print result
@@ -150,8 +166,9 @@ function runClassification(parameters)
     outArray{i,3} = humanRosehip(i).name;
     outArray{i,4} = dataMatrix(i,1);
     outArray{i,5} = dataMatrix(i,2);
+    outArray{i,6} = classifiedVector(i);
   end
-  outArray = [{'group','id','name','maxISIstd','sag'};outArray];
+  outArray = [{'group','id','name','maxISIstd','sag','class'};outArray];
   xlswrite(outputPath, outArray);
   %% -------------------------    
 end

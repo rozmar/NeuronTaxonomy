@@ -14,7 +14,7 @@ function maxSD = findMaxSDInSweep(recRange, cutInt, nMinAP, APF)
     nAP          = size(thisSweepAP,1);
        
     % Skip sweeps which can't satisfy cond.
-    if (~found && nAP<nMinAP)
+    if nAP<nMinAP
       ISIvector(s) = NaN;
       continue;
     end
@@ -26,8 +26,8 @@ function maxSD = findMaxSDInSweep(recRange, cutInt, nMinAP, APF)
     relevantRange = recRange + [1,-1]*cutInt;
     relevantAPIdx = (relevantRange(1)<=thisAP&thisAP<=relevantRange(2));
         
-    % If no AP remained after cut, skip this sweep
-    if isempty(relevantAPIdx)
+    % If no or less AP remained after cut, skip this sweep
+    if isempty(relevantAPIdx) || length(relevantAPIdx)<nMinAP
       ISIvector(s) = NaN;
       continue; 
     end
