@@ -2,7 +2,7 @@
 % Returns the following values:
 % threshold thresholdV threshCorrector threshVCorrected
 function thresholdFeatures = findThreshold(startpos,iv,derivative,thresholdValue, SI)
-
+%%
 	thresholdFeatures = [];		%collector of the features
 	
 	if nargin < 4
@@ -11,7 +11,7 @@ function thresholdFeatures = findThreshold(startpos,iv,derivative,thresholdValue
     end
 	
     % Old method: find dvMax from the AP max
-    if nargin<5
+    if nargin<6 %edited by marci from nargin<5
 	  %go below 20mV
 	  th = find(iv(1:startpos)<0.02,1,'last');
 		

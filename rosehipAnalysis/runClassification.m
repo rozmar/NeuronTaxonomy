@@ -152,7 +152,8 @@ function runClassification(parameters)
     outArray{i,5} = dataMatrix(i,2);
   end
   outArray = [{'group','id','name','maxISIstd','sag'};outArray];
-  xlswrite(outputPath, outArray);
+  xlwrite(outputPath, outArray);
+  
   %% -------------------------    
 end
 

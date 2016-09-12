@@ -67,7 +67,7 @@ function [apFeatures apNums] = describeAP(x,Y,apMasks,apNums,taustart,pulseend)
 				apRow = [ sweepID(i) apMax currentAPmaskMaxPos ];
 				   
 				thresholdFeatures = findThreshold(currentAPmaskMaxPos,y,dy,10,SI);	%find the threshold features
-				thresholdFeatures5 = [ thresholdFeatures5 ; findThreshold(currentAPmaskMaxPos,y,dy,50) ];	%find the threshold features
+				thresholdFeatures5 = [ thresholdFeatures5 ; findThreshold(currentAPmaskMaxPos,y,dy,50,SI) ];	%find the threshold features % SI added as last argument by marci
 
 				apEndFeatures = findApEnd(currentAPmaskMaxPos,y,dy);
 				apEndFeatures5 = [ apEndFeatures5 ; findApEnd(currentAPmaskMaxPos,y,dy,20) ];
