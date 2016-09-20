@@ -45,12 +45,16 @@ projects(8).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_AAC
 projects(8).listName='humanAAC.txt';
 projects(8).xlsname='humanAAC.xls';
 
+projects(9).Name='molnarg_Karrinak';
+projects(9).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Molnarg/Karrinak'];
+projects(9).listName='Spike transmission to human interneurons.txt';
+projects(9).xlsname='Spike transmission to human interneurons.xls';
+
 [Selection,ok]=listdlg('ListString',{projects.Name},'ListSize',[300 600]);
 
 listPath=projects(Selection).listPath;
 listName=projects(Selection).listName;
 xlsname=projects(Selection).xlsname;
-
 taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell)% the class can be only one character!
 
 %% locating files
