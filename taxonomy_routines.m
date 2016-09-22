@@ -1,6 +1,6 @@
 %  setting path,generating txt
 close all
-clear all
+% clear all
 
 ivpercell=1;%'all the IVs'; % the first (ivpercell) IVs will be used for each cell if the (ivpercell) variable is numeric. All the IVs will be used if this variable is not numeric.
 savetheIV=1; %the processed IV-s are saved (in separate directories) when ==1
@@ -46,7 +46,7 @@ projects(8).listName='humanAAC.txt';
 projects(8).xlsname='humanAAC.xls';
 
 projects(9).Name='molnarg_Karrinak';
-projects(9).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Molnarg/Karrinak'];
+projects(9).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Molnarg/Spike transmissions with Karri'];
 projects(9).listName='Spike transmission to human interneurons.txt';
 projects(9).xlsname='Spike transmission to human interneurons.xls';
 
@@ -74,25 +74,25 @@ inputDir=paths;
 %% extracting features
 button = questdlg('Would you like to export raw IVs?','raw export','yes','no','yes');
 if strcmp(button,'yes')
-    %     if isempty(clabels)
-    %         delete([featDir,'/*.mat']);
-    %     else
-    %         for i=1:length(clabels)
-    %             delete([featDir,'/',clabels(i),'/*.mat']);
-    %         end
-    %     end
+        if isempty(clabels)
+            delete([featDir,'/*.mat']);
+        else
+            for i=1:length(clabels)
+                delete([featDir,'/',clabels(i),'/*.mat']);
+            end
+        end
     processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
 end
 %% collecting specified features
 button = questdlg('Would you like to collect features?','collect features','yes','no','yes');
 if strcmp(button,'yes')
     if isempty(clabels)
-        %         delete([datasumDir,'/*.mat']);
+                delete([datasumDir,'/*.mat']);
         i=1;
         collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels);
     else
         for i=1:length(clabels)
-            %             delete([datasumDir,'/',clabels(i),'/*.mat']);
+                        delete([datasumDir,'/',clabels(i),'/*.mat']);
             collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels(i));
         end
     end
@@ -241,21 +241,15 @@ if classnum>1
     fnames=[fnames,statheader];
     datamatrix=[datamatrix,statmatrix];
 end
-% % % oszlopszam=length(DATASUM);
-% % % Abetszam=str2num('A');
-% % % Zbetuszam=str2num('Z');
-% % % endbetu
-% % % while oszlopszam/Abetszam>1
-% % %
-% % % elsobetu=char(floor(oszlopszam/Abetszam)+'A');
-% % % masodikbetu=char(oszlopszam-floor(oszlopszam/Abetszam)+'A');
 
+delete([listPath,'/sumdata.xls']);
 xlwrite([listPath,'/sumdata.xls'],fieldek','Sheet 1',['C1']);
 xlwrite([listPath,'/sumdata.xls'],fnames','Sheet 1',['A1']);
 xlwrite([listPath,'/sumdata.xls'],IDs','Sheet 1',['B1']);
 xlwrite([listPath,'/sumdata.xls'],datamatrix','Sheet 1',['C2']);%,char(length(DATASUM)+'A'),num2str(length(fieldek)+1)
 return
 %% csoport hisztogramok
+close all
 fieldek=fieldnames(DATASUM);
 fieldek(find(strcmp(fieldek,'fname')))=[];
 fieldek(find(strcmp(fieldek,'iv')))=[];
@@ -264,42 +258,44 @@ princompmatrix=[];
 princompps=[];
 princompnames=[];
 for fieldnum=1:length(fieldek)
-    figure(1)
-    clf
-    clear datanow
-    for i=1:length(csoporok)
-        alldata=[DATASUM.(fieldek{fieldnum})];
-        range=[min(alldata):(max(alldata)-min(alldata))/20:max(alldata)];
-        subplot(length(csoporok)+1,1,1)
-        hist(alldata,range)
-        title(fieldek{fieldnum})
-        
-        neededcells=[DATASUM.class]==csoporok(i);
-        toplot=[DATASUM(neededcells).(fieldek{fieldnum})];
-        subplot(length(csoporok)+1,1,i+1)
-        hist(toplot,range)
-        title(csoporok(i))
-        datanow(i).data=toplot;
-    end
-    figure(2)
-    clf
-    plot([DATASUM.class],alldata,'ko')
-    xlim([0 5])
-    [p,h]=ranksum(datanow(1).data,datanow(2).data,.001);
-    if h==1
-        disp(p)
-        if ~any(isnan([DATASUM.(fieldek{fieldnum})]))
-            princompmatrix(:,size(princompmatrix,2)+1)=[DATASUM.(fieldek{fieldnum})]';
-            princompps(length(princompps)+1)=p;
-            princompnames{length(princompnames)+1}=fieldek{fieldnum}
+    if ~ischar([DATASUM.(fieldek{fieldnum})]) & ~strcmp(fieldek{fieldnum},'class')
+        figure(1)
+        clf
+        clear datanow
+        for i=1:length(csoporok)
+            alldata=[DATASUM.(fieldek{fieldnum})];
+            range=[min(alldata):(max(alldata)-min(alldata))/20:max(alldata)];
+            subplot(length(csoporok)+1,1,1)
+            hist(alldata,range)
+            title(fieldek{fieldnum})
+            
+            neededcells=[DATASUM.class]==csoporok(i);
+            toplot=[DATASUM(neededcells).(fieldek{fieldnum})];
+            subplot(length(csoporok)+1,1,i+1)
+            hist(toplot,range)
+            title(csoporok(i))
+            datanow(i).data=toplot;
         end
-        %         pause
+        figure(2)
+        clf
+        plot([DATASUM.class],alldata,'ko')
+        xlim([0 5])
+        [p,h]=ranksum(datanow(1).data,datanow(2).data,.001);
+        if h==1
+            disp(p)
+            if ~any(isnan([DATASUM.(fieldek{fieldnum})]))
+                princompmatrix(:,size(princompmatrix,2)+1)=[DATASUM.(fieldek{fieldnum})]';
+                princompps(length(princompps)+1)=p;
+                princompnames{length(princompnames)+1}=fieldek{fieldnum};
+            end
+            %         pause
+        end
     end
 end
 
 %% principal component analysis
 mergecorrelatingvals=1;
-corrpval=.01;
+corrpval=.001;
 count=6;
 
 [princomppsnew,IX]=sort(princompps);
