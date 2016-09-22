@@ -3,7 +3,7 @@ function datasums = collect_specified_features_from_dir(ivinputDir,featinputDir,
         extractor = @basic_features;
     end
 
-	if nargin == 5
+	if nargin > 4
 		clabel = ['/',clabel];
 	else
 		clabel = '/A';
