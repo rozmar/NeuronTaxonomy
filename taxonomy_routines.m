@@ -47,7 +47,7 @@ projects(8).xlsname='humanAAC.xls';
 
 projects(9).Name='molnarg_Karrinak';
 projects(9).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Molnarg/Karrinak'];
-projects(9).listName='Spike transmission to human interneurons.txt';
+projects(9).listName='Spiketransmissiontohumaninterneurons.txt';
 projects(9).xlsname='Spike transmission to human interneurons.xls';
 
 [Selection,ok]=listdlg('ListString',{projects.Name},'ListSize',[300 600]);
@@ -84,6 +84,7 @@ if strcmp(button,'yes')
     processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
 end
 %% collecting specified features
+extractor = @basic_features;
 button = questdlg('Would you like to collect features?','collect features','yes','no','yes');
 if strcmp(button,'yes')
     if isempty(clabels)
@@ -93,7 +94,7 @@ if strcmp(button,'yes')
     else
         for i=1:length(clabels)
             %             delete([datasumDir,'/',clabels(i),'/*.mat']);
-            collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels(i));
+            collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,savetheIV,clabels(i),extractor);
         end
     end
 end
