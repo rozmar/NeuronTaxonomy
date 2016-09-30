@@ -1,8 +1,9 @@
-function datasums = collect_specified_features_from_dir(ivinputDir,featinputDir,outputDir,savetheIV,clabel)
+function datasums = collect_specified_features_from_dir(ivinputDir,featinputDir,outputDir,savetheIV,clabel,extractor)
+    if nargin<6
+        extractor = @basic_features;
+    end
 
-    extractor = @basic_features;
-
-	if nargin == 5
+	if nargin > 4
 		clabel = ['/',clabel];
 	else
 		clabel = '/A';
