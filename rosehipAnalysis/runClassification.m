@@ -159,7 +159,7 @@ function runClassification(parameters)
   %% -------------------------    
   outputDir  = strcat(dataDir,'../');
   outputPath = strcat(outputDir,'features.xlsx');
-  outArray   = cell(nAllCell, 5);
+  outArray   = cell(nAllCell, 6);
   for i = 1 : nAllCell
     outArray{i,1} = humanRosehip(i).class;
     outArray{i,2} = humanRosehip(i).id;
@@ -168,7 +168,7 @@ function runClassification(parameters)
     outArray{i,5} = dataMatrix(i,2);
     outArray{i,6} = classifiedVector(i);
   end
-  outArray = [{'group','id','name','maxISIstd','sag'};outArray];
+  outArray = [{'group','id','name','maxISIstd','sag','class'};outArray];
   xlwrite(outputPath, outArray);
 
   %% -------------------------    
