@@ -1,35 +1,41 @@
 function PMatrix = calculatePosterior(dataMatrix, classVector)
-  classLabels = unique(classVector);
-  nClass = length(classLabels);
-  nDim   = size(dataMatrix,2);
-  gModels = cell(nClass,1);
-  mixP    = zeros(nClass,1);
-  mus     = zeros(nClass, nDim); 
+  labels    = unique(classVector);
+  nClass    = length(labels);
+  nDim      = size(dataMatrix,2);
+  mixingP   = zeros(nClass,1);
+  muMatrix  = zeros(nClass, nDim); 
+  sigMatrix = zeros(nDim, nDim, nClass);
   
   for c = 1 : nClass
-    gmm = gmdistribution.fit(dataMatrix(classVector==c,:), 1);
+      
+    thisClassFlag =(classVector==c);
+    thisClassElem = dataMatrix(thisClassFlag,:);
+    thisGaussian  = gmdistribution.fit(thisClassElem, 1);
     
-    mixP(c) = sum(classVector==c);
-    mus(c,:) = gmm.mu;
-    sigmas(:,:,c) = gmm.Sigma;
+    mixingP(c)       = sum(thisClassFlag);
+    muMatrix(c,:)    = thisGaussian.mu;
+    sigMatrix(:,:,c) = thisGaussian.Sigma;
     
   end
   
-  mixP = mixP./length(classVector);
+  mixingP = mixingP./sum(mixingP);  %normalize mixing P
   
-  globalGmm = gmdistribution(mus, sigmas, mixP);
+  globalGmm = gmdistribution(muMatrix, sigMatrix, mixingP);
   PMatrix   = globalGmm.posterior(dataMatrix);
   
   x = sort(dataMatrix(:,1));
   y = sort(dataMatrix(:,2));
   
-  [X,Y] = meshgrid(x,y);
-  gmmPdf = globalGmm.pdf([X(:),Y(:)]);
-  gmmPdf = reshape(gmmPdf, length(y), length(x));
-  
   figure;
-  pcolor(x, y, gmmPdf);
-  colormap jet;
-  shading interp;
+  hold on;
+  colors = ['r', 'b'];
+  for c = 1 : nClass
+    scatter(dataMatrix(classVector==c,1), dataMatrix(classVector==c,2), colors(c), 'filled');
+  end
+  ezcontour(@(x,y)pdf(globalGmm,[x,y]), [min(x), max(x)], [min(y),max(y)]);
+  %pcolor(x, y, gmmPdf);
+  %colormap jet;
+  %shading interp;
+  hold off;
   
 end
