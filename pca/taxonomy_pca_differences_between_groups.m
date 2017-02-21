@@ -1,6 +1,6 @@
 function taxonomy_pca_differences_between_groups(DATASUM)
 %% variables
-signvalbetweengroups=.001; % significance level when comparing groups
+signvalbetweengroups=.01; % significance level when comparing groups
 mergecorrelatingvals=1; % use only one from the correlating variables
 corrpval=.001; % threshold for correlation (p)
 count=10; %the number of variables included in the PCA

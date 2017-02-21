@@ -80,16 +80,28 @@ function runbutton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
   isInCorrect = checkParams(handles);
   
+  [locations]=marcicucca_locations;
+  path=[locations.matlabstuffdir,'NotMine/20130227_xlwrite/'];
+  javaaddpath([path 'poi_library/poi-3.8-20120326.jar']);
+  javaaddpath([path 'poi_library/poi-ooxml-3.8-20120326.jar']);
+  javaaddpath([path 'poi_library/poi-ooxml-schemas-3.8-20120326.jar']);
+  javaaddpath([path 'poi_library/xmlbeans-2.3.0.jar']);
+  javaaddpath([path 'poi_library/dom4j-1.6.1.jar']);
+  path=[locations.matlabstuffdir,'20130227_xlwrite/'];
+  javaaddpath([path 'poi_library/poi-3.8-20120326.jar']);
+  javaaddpath([path 'poi_library/poi-ooxml-3.8-20120326.jar']);
+  javaaddpath([path 'poi_library/poi-ooxml-schemas-3.8-20120326.jar']);
+  javaaddpath([path 'poi_library/xmlbeans-2.3.0.jar']);
+  javaaddpath([path 'poi_library/dom4j-1.6.1.jar']);
+  
   if isInCorrect==0
-    try 
+  
       parameters.dataFile = get(handles.datadirpath, 'String');
       parameters.dataSums = get(handles.dsdirpath, 'String');
       parameters.cutInterval = str2double(get(handles.edit1, 'String'));
       parameters.nMinAp = str2double(get(handles.edit2, 'String'));
       runClassification(parameters);
-    catch ME
-      error(ME.message); 
-    end
+  
   else
     errorText = '';
     switch isInCorrect

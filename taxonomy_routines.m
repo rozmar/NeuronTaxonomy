@@ -18,6 +18,7 @@ projects(2).listName='realngfcelldata.txt';
 projects(3).Name='low-highNGF';
 projects(3).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF'];
 projects(3).listName='lowhigh.txt';
+projects(3).xlsname='lowhigh.xls';
 
 projects(4).Name='Human_pyr_harvest';
 projects(4).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Human_pyr_USA'];
