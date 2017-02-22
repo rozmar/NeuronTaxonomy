@@ -127,20 +127,11 @@ end
 
 function PowerMatrix = trimTime(PowerMatrix)
 
-  if size(PowerMatrix,2)==1
-    numSamplePoint = length(PowerMatrix);
-  else
-    numSamplePoint = size(PowerMatrix,2);
-  end
-  
+  if 
+
+  numSamplePoint = size(PowerMatrix,2);
   quarterLength  = round(0.25*numSamplePoint);
-  
-  if size(PowerMatrix,2)==1
-    PowerMatrix = PowerMatrix(quarterLength+1:numSamplePoint-quarterLength);
-  else
-    PowerMatrix = PowerMatrix(:,quarterLength+1:numSamplePoint-quarterLength);
-  end
-  
+  PowerMatrix = PowerMatrix(:,quarterLength+1:numSamplePoint-quarterLength);
 end
 
 % This function find and cut the slices between spikes
