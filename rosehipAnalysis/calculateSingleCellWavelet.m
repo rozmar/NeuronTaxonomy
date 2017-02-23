@@ -16,16 +16,21 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   apSweepId   = apFeatures(:,1);
   sweepWithAP = unique(apSweepId);
   numAPSweep  = length(sweepWithAP);
+  spectralMode = parameters.spectral.mode;
+  plotVector = getPlottingVector(parameters.plot);
   
   parameters.segmentBnd = ivStructure.segment./1000;
-  parameters.interval   = 1/featStruct.samplingRate;
+  parameters.wavelet.interval   = 1/featStruct.samplingRate;
+  
+  parameters.fourier.samplingRate = featStruct.samplingRate;
   
   meanPowerSpectrum = cell(1,numAPSweep);
+  meanMembPotential = zeros(1,numAPSweep).*NaN;
   %% ---------------------------
   
-  %% ---------------------------
+  % ---------------------------
   %  Loop through each firing sweep
-  %% ---------------------------
+  % ---------------------------
   for i = 1 : numAPSweep
     
     % Collect slices between spikes
@@ -33,9 +38,10 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
         collectSliceBetweenSpike(ivStructure, ...
         apFeatures, ...
         sweepWithAP(i), ...
-        (apSweepId==sweepWithAP(i)), ...
+        apSweepId==sweepWithAP(i), ...
         parameters);
     
+    % Number of valid slices
     numSlice = length(slicesBetweenSpike);
     
     % Sweep without slice will be skipped
@@ -45,74 +51,136 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
     
     % Prepare for wavelet transformation
     meanPowerMatrix = cell(1, numSlice);
+    avgSlice        = zeros(1,numSlice);
     weights = [slicesBetweenSpike.length];
+    weights = weights./sum(weights);
     
-    % Do wavelet transform
+    % --------------------
+    % Do spectral analysis
+    % for each slice.
+    % --------------------
     for s = 1 : numSlice
+      
+      % Calculate membrane potential
+      % as the mean of the slice
+      thisSlice = slicesBetweenSpike(s).values;
+      avgSlice(s) = mean(thisSlice);
+      
+      if spectralMode == 1  % Mode == wavelet
+          
+        % Calculate wavelet power
+        [PowerMatrix, frequencyVector] = calculateTFDPower(thisSlice, parameters.wavelet);
+        % Trim frequency band which won't be plotted
+        [PowerMatrix, frequencyVector] = ...
+          trimBoundaries(PowerMatrix, frequencyVector, parameters);
+      
+        % Do the spectrogram
+        if plotVector(1)
+          
+          thisTime = slicesBetweenSpike(s).times;
+          
+          figure;
+          plotPowerSpectrum(thisTime, frequencyVector, PowerMatrix, parameters.plot);
+          title(sprintf('Sweep %d, Slice %d', sweepWithAP(i), s));
+        end
+      
+        % Average over time by frequency
+        meanPowerMatrix{s} = nanmean(PowerMatrix,2).*weights(s);
         
-      % Calculate wavelet power
-      [PowerMatrix, freqVector] = calculateTFDPower(slicesBetweenSpike(s).values, parameters);
-      % Trim parts which won't be plotted
-      [PowerMatrix, freqVector] = trimBoundaries(PowerMatrix, freqVector, parameters);
-      
-      PowerMatrix = trimTime(PowerMatrix);
-      slicesBetweenSpike(s).times = trimTime(slicesBetweenSpike(s).times);
-      
-      if parameters.plot.plotSpectrogram
-        figure;
-        plotPowerSpectrum(slicesBetweenSpike(s).times, freqVector, PowerMatrix, parameters.plot);
-        title(sprintf('Sweep %d, Slice %d', sweepWithAP(i), s));
+      elseif spectralMode == 2  % Mode == FFT
+          
+        % Calculate the FFT power
+        [fftPower, frequencyVector] = ...
+            performFFT(thisSlice, parameters.fourier);
+         
+        % Trim frequency band which won't be plotted
+        [fftPower, frequencyVector] = ...
+          trimBoundaries(fftPower, frequencyVector, parameters);
+          
+        % Save the weighted power
+        meanPowerMatrix{s} = fftPower.*weights(s);
       end
       
-      % Average over time by frequency
-      meanPowerMatrix{s} = nanmean(PowerMatrix,2).*weights(s);
-      
     end
+    % End of the spectral
+    % analysis
+    % --------------------
     
-    % Calculate weighted power average for sweep
-    meanPowerSpectrum{i} = sum(cell2mat(meanPowerMatrix),2)./sum(weights);
+    % Calculate weighted average of power for a sweep
+    meanPowerSpectrum{i} = sum(cell2mat(meanPowerMatrix),2);
+    
+    % Calculate weighted average of membrane potential
+    meanMembPotential(i) = sum(avgSlice.*weights);
     
     % Plot current sweep's average power spectrum
-    if isfield(parameters.plot, 'plotSinglePowerSpect') && parameters.plot.plotSinglePowerSpect
+    if plotVector(2)
         
       figure;
-      plot(freqVector, meanPowerSpectrum{i});
+      subplot(2,1,1);
+      plot(frequencyVector, meanPowerSpectrum{i});
+      
       if isfield(parameters.plot, 'frequencyBound')
         xlim(parameters.plot.frequencyBound);
       end
-      title(sprintf('Power Spectrum weighted average for sweep %d', sweepWithAP(i)));
+      
+      title(sprintf('Power Spectrum weighted average for sweep %d (%.3f sec)', sweepWithAP(i), slicesBetweenSpike(s).length*1/featStruct.samplingRate));
+      
+      subplot(2,1,2);
+      plot(slicesBetweenSpike(s).times, slicesBetweenSpike(s).values);
     end
     
   end
-  %% ---------------------------
+  % End of processing a sweep
+  % ---------------------------
+  
+  %% --------------------------
+  %  Remove sweep without slice
+  %% --------------------------
+  emptyPower = cellfun(@isempty, meanPowerSpectrum);
+  emptyMemPot = isnan(meanMembPotential);
+  meanPowerSpectrum(emptyPower) = [];
+  meanMembPotential(emptyMemPot) = [];
+  %% --------------------------
   
   %% --------------------------
   %  Find the maximal power
-  %% --------------------------
-  meanPowerSpectrum(cellfun(@isempty, meanPowerSpectrum)) = [];
-  [maxPowerValue, maxPowerPos] = max(cell2mat(meanPowerSpectrum));
-  maxPowerFreq = freqVector(maxPowerPos);
+  %  value and frequency
+  %% --------------------------  
+  [maxPowerValue,maxPowerPos] = cellfun(@max, meanPowerSpectrum);
+  %[maxPowerValue, maxPowerPos] = max(cell2mat(meanPowerSpectrum));
+  maxPowerFreq = frequencyVector(maxPowerPos);
   %% --------------------------
   
   %% --------------------------
   %  Assemble result set
   %% --------------------------
+  resultStructure.numSweep = length(meanMembPotential);
   resultStructure.meanPowerSpectrum = meanPowerSpectrum;
-  resultStructure.maxPower          = maxPowerValue;
-  resultStructure.maxPowerFreq      = maxPowerFreq;
+  resultStructure.meanMembranePotential = meanMembPotential;
+  resultStructure.maxPower = maxPowerValue;
+  resultStructure.maxPowerFreq = maxPowerFreq;
   %% --------------------------
   
 end
 
 % This function cut slices between spikes from a given sweep
 function slicesBetweenSpike = collectSliceBetweenSpike(ivStructure, apFeatures, sweepNumber, thisSweepFlag, parameters)
+
+  % Get AP features for this sweep
   thisSweepAP = apFeatures(thisSweepFlag,:);
   
+  % Get sweep's time and signal
   signalStructure.times  = ivStructure.time;
   signalStructure.values = getSweep(ivStructure, sweepNumber);
   
+  % Cut slices for each segment
   slicesBetweenSpike = ...
       cutSlicesBetweenSpikes(signalStructure, thisSweepAP, parameters);
+  
+  % Concatenate slices 
+  if ~isempty(slicesBetweenSpike) && isConcat(parameters)
+    slicesBetweenSpike = concatenateSegments(slicesBetweenSpike);
+  end
 end
 
 % This function trim the frequency outside the frequency boundary
@@ -123,24 +191,6 @@ function [PowerMatrix, freqVector] = trimBoundaries(PowerMatrix, freqVector, par
     freqVector = freqVector(retainIndex);
     PowerMatrix = PowerMatrix(retainIndex,:);
   end
-end
-
-function PowerMatrix = trimTime(PowerMatrix)
-
-  if size(PowerMatrix,2)==1
-    numSamplePoint = length(PowerMatrix);
-  else
-    numSamplePoint = size(PowerMatrix,2);
-  end
-  
-  quarterLength  = round(0.25*numSamplePoint);
-  
-  if size(PowerMatrix,2)==1
-    PowerMatrix = PowerMatrix(quarterLength+1:numSamplePoint-quarterLength);
-  else
-    PowerMatrix = PowerMatrix(:,quarterLength+1:numSamplePoint-quarterLength);
-  end
-  
 end
 
 % This function find and cut the slices between spikes
@@ -162,10 +212,14 @@ function sliceStructure = cutSlicesBetweenSpikes(signalStructure, thisSweepAP, p
   end
   
   lengthBySegment = cellfun(@length, sliceArray);
-  lengthArray = mat2cell(lengthBySegment, ones(length(sliceArray),1), 1);
+  if length(sliceArray) == 1
+    sliceStructure.length = lengthBySegment;
+    return;
+  end
+  
+  lengthArray = num2cell(lengthBySegment, [length(sliceArray),1]);
   [sliceStructure.length] = deal(lengthArray{:});
-  %[sliceStructure(:).length] = ...
-  %    deal(mat2cell(lengthBySegment,ones(length(sliceArray),1),1));
+  
 end
 
 % This function creates segment structures for non-spiking segments
@@ -189,8 +243,8 @@ function segmentStructure = createBetweenSpikeSegment(timeVector, APMatrix, para
 
 end
 
-% This function deletes the given interval from both end of the given
-% matrix
+% This function deletes the given interval 
+% from both end of the given matrix
 function APMatrix = cutSweepEnds(timeVector, APMatrix, segments, cutInterval)
   
   apTime = timeVector(APMatrix(:,3));
@@ -208,9 +262,29 @@ end
 
 % Parameter validator functon
 function parameters = checkParameters(~, parameters)
-  freqBound = parameters.plot.frequencyBound;
-  freqBound(1) = max([freqBound(1), ceil(1/parameters.minSliceLength)]);
-  freqBound(2) = min([freqBound(2), parameters.max]);
+
+  if parameters.spectral.mode == 1
+    
+    freqBound = parameters.plot.frequencyBound;
+    freqBound(1) = max([freqBound(1), ceil(1/parameters.minSliceLength)]);
+    freqBound(2) = min([freqBound(2), parameters.max]);
   
-  parameters.plot.frequencyBound = freqBound;
+    parameters.plot.frequencyBound = freqBound;
+  end
+end
+
+% Creates a flag vector to indicate needed plot
+function plotVector = getPlottingVector(parameters)
+  plotVector(2) = ...
+      isfield(parameters, 'plotSinglePowerSpect') && ...
+      parameters.plotSinglePowerSpect;
+
+  plotVector(1) = ...
+    isfield(parameters, 'plotSpectrogram') && ...
+    parameters.plotSpectrogram;
+end
+
+% Decide if we should perform concatenation
+function answer = isConcat(parameters)
+  answer = isfield(parameters, 'concatSlices') && parameters.concatSlices;
 end
