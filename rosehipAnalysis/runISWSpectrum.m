@@ -1,6 +1,7 @@
 %% ==================================
 %  Starting the script
 %% ==================================
+addpath(genpath('.'));
 clear parameters;
 %% ==================================
 
@@ -37,7 +38,7 @@ parameters.concatSlices   = 1;
 parameters.spectral.mode = 2;
 %  ---------------------------
 %  Fourier analysis parameters
-parameters.fourier.numberOfPoints = 4096;
+parameters.fourier.numberOfPoints = 65536;
 %  ---------------------------
 %  Wavelet analysis parameters
 parameters.wavelet.min = 10;

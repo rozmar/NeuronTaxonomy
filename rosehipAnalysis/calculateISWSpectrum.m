@@ -1,4 +1,4 @@
-function runSingleWavelet(parameters)
+function calculateISWSpectrum(parameters)
 
   %% -------------------------
   %  Collect containing dir
