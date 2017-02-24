@@ -58,10 +58,15 @@ function datasum = basic_features(cell,current,time)
     
     sweeps = find(cell.apNums>2);
     rawdata.accomodation=nan(max(size(sweeps),1));
+    rawdata.accomodationperAPnum=nan(max(size(sweeps),1));
     rawdata.apaccomodation=nan(max(size(sweeps),1));
+    rawdata.apaccomodationperAPnum=nan(max(size(sweeps),1));
     rawdata.hwaccomodation=nan(max(size(sweeps),1));
+    rawdata.hwaccomodationperAPnum=nan(max(size(sweeps),1));
     rawdata.thresholdaccomodation=nan(max(size(sweeps),1));
+    rawdata.thresholdaccomodationperAPnum=nan(max(size(sweeps),1));
     rawdata.sweepISI=nan(max(size(sweeps),1));
+    rawdata.sweepISIperAPnum=nan(max(size(sweeps),1));
     
     for i=1:length(sweeps)
         sweepnum=sweeps(i);
@@ -70,21 +75,24 @@ function datasum = basic_features(cell,current,time)
         isi1 = cell.apFeatures(potidxes(1),featS.ISI);
         isi2 = cell.apFeatures(potidxes(end),featS.ISI);
         rawdata.accomodation(i)=isi2/isi1;
+        rawdata.accomodationperAPnum=rawdata.accomodation(i)/sum(cell.apFeatures(:,1)==sweepnum);
         
         potidxes=find(cell.apFeatures(:,1)==sweepnum); %cell.apFeatures(:,featS.apMax)>0 & 
          
         apampl1 = cell.apFeatures(potidxes(1),featS.apAmplitude);
         apampl2 = cell.apFeatures(potidxes(end),featS.apAmplitude);
         rawdata.apaccomodation(i)=apampl2/apampl1;
+        rawdata.apaccomodationperAPnum(i)=rawdata.apaccomodation(i)/sum(cell.apFeatures(:,1)==sweepnum);
         
         hw1 = cell.apFeatures(potidxes(1),featS.halfWidthLength);
         hw2 = cell.apFeatures(potidxes(end),featS.halfWidthLength);
         rawdata.hwaccomodation(i)=hw2/hw1;
+        rawdata.hwaccomodationperAPnum(i)=rawdata.hwaccomodation(i)/sum(cell.apFeatures(:,1)==sweepnum);
         
         thresh1 = cell.apFeatures(potidxes(1),featS.thresholdV);
         thresh2 = cell.apFeatures(potidxes(end),featS.thresholdV);
         rawdata.thresholdaccomodation(i)=thresh2-thresh1;
-        
+        rawdata.thresholdaccomodationperAPnum(i)=rawdata.thresholdaccomodation(i)/sum(cell.apFeatures(:,1)==sweepnum);
         rawdata.sweepISI(i)=nanmean(cell.apFeatures(potidxes,featS.ISI)); 
     end
     

@@ -28,7 +28,7 @@ function processRawIvs(listPath,listName,inputDir,outputDir,projectName, clabels
         elseif length(clabels)<1
             classDir = '/';
         else
-            classDir = ['/',clabels(cls(j))];
+            classDir = ['/',clabels{cls(j)}];
         end
         if strcmp(class(inputDir),'char')
             processCellFromFile(inputDir,[name{j},'.mat'],id{j},outputDir,[projectName,classDir],ivname{j},listPath);
