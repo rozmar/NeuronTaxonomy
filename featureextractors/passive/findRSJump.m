@@ -15,7 +15,7 @@ function [taustart vrs] = findRSJump(x,Y,currents,sampleInterval,hundredMicsStep
 	posSweeps = Y(find(currents>0),:);
 	
 	startPos = find(abs(x-segments(1)/1000)==min(abs(x-segments(1)/1000)),1,'first')+1;
-	maxLength=round(.001/sampleInterval);
+	maxLength=round(.0006/sampleInterval);
 
 	%create filter window
 	h = fspecial('average', [1 hundredMicsStep]);
@@ -103,15 +103,16 @@ function [taustart vrs] = findRSJump(x,Y,currents,sampleInterval,hundredMicsStep
 	%the RS artefact
 	[minNegD,minNegDPos]=nanmin(negDeriv);
 % 	minNegDPos=find(negDeriv==minNegD,1,'first');
-    while minNegD<negDeriv(minNegDPos+1)
+%%
+    while minNegD<negDeriv(minNegDPos+1) & minNegDPos<length(negDeriv)-1
         minNegDPos=minNegDPos+1;
         minNegD=negDeriv(minNegDPos);
     end
-
+%%
 	%find the max. derivative in the positive IVs then look for the end of
 	%the RS artefact
 	[maxPosD,maxPosDPos]=nanmax(posDeriv);
-    while maxPosD>posDeriv(maxPosDPos+1)
+    while maxPosD>posDeriv(maxPosDPos+1) & maxPosDPos<length(posDeriv)-1
         maxPosDPos=maxPosDPos+1;
         maxPosD=posDeriv(maxPosDPos);
     end

@@ -41,7 +41,7 @@ function processFile(fpath,fname,sourcepath,pathvar)
 			%cell's first I not negative OR
 			%cell's last I is negative, then FAIL
 			if isnan(cell.holding) || cell.v1(1)>v0max || cell.holding<holdingmin || cell.holding>holdingmax || cell.sweepnum<minsweepnum || cell.current(1)>=0 || cell.current(length(cell.current))<=0
-				disp([cellname,' -- fail']);
+				disp([fname,'_',cellname,' -- fail']);
 			else
 				temphossz=[];
 				
@@ -51,11 +51,11 @@ function processFile(fpath,fname,sourcepath,pathvar)
 				end
 							
 				if ~sum(temphossz==length(cell.time))	%not equal long sweeps
-					disp([cellname,' -- fail not equal sweeps']);
+					disp([fname,'_',cellname,' -- fail not equal sweeps']);
 				elseif cell.time(end)<sum(cell.segment(1:2)/1000)	%sweep too short
-					disp([cellname,' -- fail not correct segments']);
+					disp([fname,'_',cellname,' -- fail not correct segments']);
 				else
-					disp(cellname);
+					disp([fname,'_',cellname]);
 					
 					cellStruct = featureExtract(cell);
 					plotIV(cell, cellStruct,cellname,fname);
