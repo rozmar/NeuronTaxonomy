@@ -8,8 +8,8 @@ clear parameters;
 %% ==================================
 %  Input parameters
 %% ==================================
-parameters.datasumDir = 'E:\Data\RHTEST\datasum';
-parameters.featureDir = 'E:\Data\RHTEST\feature';
+parameters.datasumDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datasums';
+parameters.featureDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datafiles';
 %% ==================================
 
 %% ==================================
@@ -38,7 +38,7 @@ parameters.concatSlices   = 1;
 parameters.spectral.mode = 2;
 %  ---------------------------
 %  Fourier analysis parameters
-parameters.fourier.numberOfPoints = 65536;
+parameters.fourier.numberOfPoints = 4096;
 %  ---------------------------
 %  Wavelet analysis parameters
 parameters.wavelet.min = 10;
@@ -71,4 +71,4 @@ javaaddpath([utilBase,'poi_library/xmlbeans-2.3.0.jar']);
 javaaddpath([utilBase,'poi_library/dom4j-1.6.1.jar']);
 
 % Run script
-runSingleWavelet(parameters);
+calculateISWSpectrum(parameters);
