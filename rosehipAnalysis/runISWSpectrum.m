@@ -8,15 +8,13 @@ clear parameters;
 %% ==================================
 %  Input parameters
 %% ==================================
-parameters.datasumDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datasums';
-parameters.featureDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datafiles';
+parameters.datasumDir = 'E:\DATA\RHTEST\datasums';
+parameters.featureDir = 'E:\DATA\RHTEST\datafiles';
 %% ==================================
 
 %% ==================================
 %  Analysis parameters
 %% ==================================
-% Cut interval from the beginning and the end of the sweep
-%parameters.cutFromEnd = 0.05;
 % Minimal interval after the AP peak
 parameters.gapAfterSpike = 0.06;
 % Minimal length of a slice.
@@ -33,12 +31,12 @@ parameters.concatSlices   = 1;
 %  Spectral analysis parameters
 %% ==================================
 %  Analysis mode
-%   - 1: Morlet wavelet
-%   - 2: Fourier transformation
-parameters.spectral.mode = 2;
+%   - 'wvl': Morlet wavelet
+%   - 'fft': Fourier transformation
+parameters.spectral.mode = 'fft';
 %  ---------------------------
 %  Fourier analysis parameters
-parameters.fourier.numberOfPoints = 4096;
+parameters.fourier.numberOfPoints = 2^16;
 %  ---------------------------
 %  Wavelet analysis parameters
 parameters.wavelet.min = 10;
@@ -51,11 +49,14 @@ parameters.wavelet.wavenumber = 9;
 %  Plotting parameters
 %% ==================================
 %  Minimal and maximal frequency to use
-parameters.plot.frequencyBound = [15,80];
+parameters.plot.frequencyBound = [0,80];
 %  Flag to display spectrogram for each segment
 parameters.plot.plotSpectrogram = 0;
 %  Flag to display power spectrum for each sweep
-parameters.plot.plotSinglePowerSpect = 1;
+parameters.plot.plotSinglePowerSpect = 0;
+
+parameters.plot.categoryRange = [-0.05,-0.025];
+parameters.plot.categoryNumber = 2;
 %% ==================================
 
 
