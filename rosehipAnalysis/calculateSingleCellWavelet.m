@@ -4,6 +4,9 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   %  Initialization
   %% ---------------------------
   parameters = checkParameters(inputStructure, parameters);
+  
+  % Resample signal if needed
+  inputStructure = preprocessData(inputStructure, parameters);
   %% ---------------------------
   
   %% ---------------------------
@@ -12,34 +15,36 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   ivStructure = inputStructure.iv;
   featStruct  = inputStructure.cellStruct;
 
-  apFeatures  = featStruct.apFeatures;
-  apSweepId   = apFeatures(:,1);
-  sweepWithAP = unique(apSweepId);
-  numAPSweep  = length(sweepWithAP);
+  apFeatures = featStruct.apFeatures;
+  apSweepId = apFeatures(:,1);
+  firingSweepID = unique(apSweepId);
+  numFiringSweep = length(firingSweepID);
   spectralMode = parameters.spectral.mode;
   plotVector = getPlottingVector(parameters.plot);
   
   parameters.segmentBnd = ivStructure.segment./1000;
-  parameters.wavelet.interval   = 1/featStruct.samplingRate;
+  sampleInterval = min(diff(ivStructure.time));
+  parameters.wavelet.interval = sampleInterval;
   
-  parameters.fourier.samplingRate = featStruct.samplingRate;
+  parameters.fourier.samplingRate = 1 / min(diff(ivStructure.time));
   
-  meanPowerSpectrum = cell(1,numAPSweep);
-  meanMembPotential = zeros(1,numAPSweep).*NaN;
-  segmentLength = zeros(1, numAPSweep) .* NaN;
+  meanPowerSpectrum = cell(1,numFiringSweep);
+  meanMembPotential = zeros(1,numFiringSweep).*NaN;
+  segmentLength = zeros(1, numFiringSweep) .* NaN;
+  sweepISIVector = cell(1, numFiringSweep);
   %% ---------------------------
   
   % ---------------------------
   %  Loop through each firing sweep
   % ---------------------------
-  for i = 1 : numAPSweep
+  for i = 1 : numFiringSweep
     
     % Collect slices between spikes
     slicesBetweenSpike = ...
         collectSliceBetweenSpike(ivStructure, ...
         apFeatures, ...
-        sweepWithAP(i), ...
-        apSweepId==sweepWithAP(i), ...
+        firingSweepID(i), ...
+        apSweepId==firingSweepID(i), ...
         parameters);
     
     % Number of valid slices
@@ -47,6 +52,11 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
     
     % Sweep without slice will be skipped
     if numSlice == 0 
+      continue;
+    end
+    
+    % Remove too short segments
+    if numSlice == 1 && isConcat(parameters) && (slicesBetweenSpike(1).duration < 0.2)
       continue;
     end
     
@@ -67,7 +77,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
       % as the mean of the slice
       thisSlice = slicesBetweenSpike(s).values;
       avgSlice(s) = slicesBetweenSpike(s).meanVal;
-      
+            
       if strcmpi(spectralMode, 'wvl') % Mode == wavelet
           
         % Calculate wavelet power
@@ -83,7 +93,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
           
           figure;
           plotPowerSpectrum(thisTime, frequencyVector, PowerMatrix, parameters.plot);
-          title(sprintf('Sweep %d, Slice %d', sweepWithAP(i), s));
+          title(sprintf('Sweep %d, Slice %d', firingSweepID(i), s));
         end
       
         % Average over time by frequency
@@ -118,6 +128,11 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
     % Calculate weighted average of membrane potential
     meanMembPotential(i) = sum(avgSlice.*weights);
     
+    sweepISIVector{i} =...
+      collectISIForSweep(...
+      apFeatures(apSweepId==firingSweepID(i), :),...
+      min(diff(ivStructure.time))); 
+    
     % Plot current sweep's average power spectrum
     if plotVector(2)
         
@@ -129,7 +144,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
         xlim(parameters.plot.frequencyBound);
       end
       
-      title(sprintf('Power Spectrum average, sweep %d (%.3f sec), membrane potential: %f', sweepWithAP(i), slicesBetweenSpike(s).length*1/featStruct.samplingRate, meanMembPotential(i)));
+      title(sprintf('Power Spectrum average, sweep %d (%.3f sec), membrane potential: %f', firingSweepID(i), slicesBetweenSpike(s).length*1/parameters.fourier.samplingRate, meanMembPotential(i)));
       
       subplot(2,1,2);
       plot(slicesBetweenSpike(s).times, slicesBetweenSpike(s).values);
@@ -147,6 +162,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   meanPowerSpectrum(emptyPower) = [];
   meanMembPotential(emptyMemPot) = [];
   segmentLength(emptyMemPot) = [];
+  sweepISIVector(emptyMemPot) = [];
   
   if isempty(meanMembPotential)
     resultStructure = [];
@@ -172,6 +188,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   resultStructure.maxPower = maxPowerValue;
   resultStructure.maxPowerFreq = maxPowerFreq;
   resultStructure.segmentLength = segmentLength;
+  resultStructure.sweepISIVector = sweepISIVector;
   %% --------------------------
   
 end
@@ -197,7 +214,6 @@ function slicesBetweenSpike = collectSliceBetweenSpike(ivStructure, apFeatures, 
 end
 
 % This function trim the frequency outside the frequency boundary
-
 function [PowerMatrix, freqVector] = trimBoundaries(PowerMatrix, freqVector, parameters)
   if isfield(parameters.plot, 'frequencyBound')
     boundary = parameters.plot.frequencyBound;
@@ -247,6 +263,7 @@ function segmentStructure = createBetweenSpikeSegments(timeVector, APMatrix, par
   
   cutStartTime = shiftWithScalar(apMaxTime, parameters.gapAfterSpike);
   cutEndTime   = [thresholdTime(2:end);getSweepEnd(parameters.segmentBnd)];
+  cutEndTime = cutEndTime - parameters.gapBeforeThreshold;
   
   sliceLength = diff([cutStartTime, cutEndTime],1,2);
   goodSlice   = (sliceLength>parameters.minSliceLength);
@@ -255,6 +272,47 @@ function segmentStructure = createBetweenSpikeSegments(timeVector, APMatrix, par
     'start', cutStartTime(goodSlice),...
     'end', cutEndTime(goodSlice));
 
+end
+
+function inputStructure = preprocessData(inputStructure, parameters)
+  if parameters.resample
+    
+    oldSR = round(inputStructure.cellStruct.samplingRate);
+    newSR = parameters.newSampleRate;
+    
+    if oldSR == newSR
+      return;
+    end
+    
+    fprintf('Need to resample. Old SR = %dHz\n', oldSR);
+    
+    numberOfSweep = inputStructure.iv.sweepnum;
+    
+    for i = 1 : numberOfSweep
+      thisSweep = getSweep(inputStructure.iv, i);
+      thisSweep = resample(thisSweep, newSR, oldSR);
+      inputStructure.iv = setSweep(inputStructure.iv, i, thisSweep);
+    end
+    
+    oldTime = inputStructure.iv.time;
+    inputStructure.iv.time = linspace(min(oldTime), max(oldTime),length(thisSweep))';
+    
+    apFeatures = inputStructure.cellStruct.apFeatures;
+    apFeatures(:,3) = round(apFeatures(:,3) .* (newSR / oldSR));
+    apFeatures(:,4) = round(apFeatures(:,4) .* (newSR / oldSR));
+    inputStructure.cellStruct.apFeatures = apFeatures;
+    
+  end
+end
+
+function isiVector = collectISIForSweep(apFeatures, sampleInterval)
+  isiInPoint = apFeatures(2:end, 3) - apFeatures(1:(end-1), 3);
+  isiVector = isiInPoint * sampleInterval;
+end
+
+function ivStructure = setSweep(ivStructure, sweepID, newSweep)
+  sweepName = sprintf('v%d', sweepID);
+  ivStructure.(sweepName) = newSweep;
 end
 
 % Getter function for a specific sweep.

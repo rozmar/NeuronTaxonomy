@@ -8,15 +8,21 @@ clear parameters;
 %% ==================================
 %  Input parameters
 %% ==================================
-parameters.datasumDir = 'E:\DATA\RHTEST\datasums';
-parameters.featureDir = 'E:\DATA\RHTEST\datafiles';
+parameters.datasumDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datasums';
+parameters.featureDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datafiles';
 %% ==================================
 
 %% ==================================
 %  Analysis parameters
 %% ==================================
+% Do we need to resample data?
+parameters.resample = 1;
+% If we resample data, what will be the new SR?
+parameters.newSampleRate = 1e5;
 % Minimal interval after the AP peak
 parameters.gapAfterSpike = 0.06;
+% Minimal interval before threshold
+parameters.gapBeforeThreshold = 0.01;
 % Minimal length of a slice.
 % If we concatenate slices, 
 % it won't be taken
@@ -36,7 +42,7 @@ parameters.concatSlices   = 1;
 parameters.spectral.mode = 'fft';
 %  ---------------------------
 %  Fourier analysis parameters
-parameters.fourier.numberOfPoints = 2^16;
+parameters.fourier.numberOfPoints = 2^17;
 %  ---------------------------
 %  Wavelet analysis parameters
 parameters.wavelet.min = 10;
