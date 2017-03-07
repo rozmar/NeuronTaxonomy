@@ -32,6 +32,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   meanMembPotential = zeros(1,numFiringSweep).*NaN;
   segmentLength = zeros(1, numFiringSweep) .* NaN;
   sweepISIVector = cell(1, numFiringSweep);
+  slicePerSweep = cell(1, numFiringSweep);
   %% ---------------------------
   
   % ---------------------------
@@ -150,6 +151,8 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
       plot(slicesBetweenSpike(s).times, slicesBetweenSpike(s).values);
     end
     
+    slicePerSweep{i} = slicesBetweenSpike;
+    
   end
   % End of processing a sweep
   % ---------------------------
@@ -189,6 +192,7 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   resultStructure.maxPowerFreq = maxPowerFreq;
   resultStructure.segmentLength = segmentLength;
   resultStructure.sweepISIVector = sweepISIVector;
+  resultStructure.slicePerSweep = slicePerSweep;
   %% --------------------------
   
 end
@@ -247,10 +251,14 @@ function sliceStructure = cutSlicesBetweenSpikes(signalStructure, thisSweepAP, p
   lengthBySegment = cellfun(@length, sliceArray);
  
   % Store values 
+  duration = 0;
   for i = 1 : length(lengthBySegment)
     sliceStructure(i).length = lengthBySegment(i);
     sliceStructure(i).meanVal = mean(sliceStructure(i).values);
     sliceStructure(i).values = detrend(sliceStructure(i).values, 'linear');
+   
+    thisTimeSlice = timeSliceArr{i};
+    sliceStructure(i).duration = diff(thisTimeSlice([1,end]));
   end
   
 end

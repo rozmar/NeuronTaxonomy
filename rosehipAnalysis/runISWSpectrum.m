@@ -8,8 +8,11 @@ clear parameters;
 %% ==================================
 %  Input parameters
 %% ==================================
-parameters.datasumDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datasums';
-parameters.featureDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datafiles';
+% parameters.datasumDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datasums';
+% parameters.featureDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datafiles';
+
+parameters.datasumDir = 'E:\Data\RHTESTNICE\datasums';
+parameters.featureDir = 'E:\Data\RHTESTNICE\datafiles';
 %% ==================================
 
 %% ==================================
@@ -30,7 +33,7 @@ parameters.gapBeforeThreshold = 0.01;
 parameters.minSliceLength = 0.0;
 % Handle different slice 
 % separately or concatenated
-parameters.concatSlices   = 1;
+parameters.concatSlices   = 0;
 %% ==================================
 
 %% ==================================
