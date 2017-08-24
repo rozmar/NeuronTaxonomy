@@ -200,10 +200,10 @@ function [ AHP ADP concavitymin concavitymax concavity concavitystd ahp05 ahp090
 				pos90 = find(y(ahp:endPos)>=y(ahp)+dv090,1,'first');	%find that position
 				pos5 = find(y(ahp:endPos)>=y(ahp)+dv05,1,'first');	%find that position
 				                
-				if size(pos90,2)==0
+				if size(pos90,2)<=1
 					pos90=NaN;
 				end
-				if size(pos5,2)==0
+				if size(pos5,2)<=1
 					pos5=NaN;
 				end
 						

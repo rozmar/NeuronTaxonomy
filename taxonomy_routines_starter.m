@@ -89,8 +89,7 @@ handles.output.doPCA=get(handles.checkbox4,'Value');
 handles.output.doRosehipanal=get(handles.checkbox5,'Value');
 handles.output.generateXLSfile=get(handles.checkbox6,'Value');
 handles.output.ivpercell=get(handles.checkbox7,'Value');
-
-if handles.output.ivpercell==0
+if ~handles.output.ivpercell
     handles.output.ivpercell='export every damn IV';
 end
 assignin('base', 'projectdata', handles.output);

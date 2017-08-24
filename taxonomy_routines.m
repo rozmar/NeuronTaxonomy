@@ -2,7 +2,7 @@
 close all
 clear all
 
-ivpercell=1;%'all the IVs'; % the first (ivpercell) IVs will be used for each cell if the (ivpercell) variable is numeric. All the IVs will be used if this variable is not numeric.
+
 
 locations=marcicucca_locations;
 defPath=[locations.tgtardir,'MATLABdata/IV'];
@@ -15,9 +15,10 @@ projects(2).Name='humanNGF-old';
 projects(2).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_NGF'];
 projects(2).listName='realngfcelldata.txt';
 
-projects(3).Name='low-highNGF';
+projects(3).Name='low-high-NGF';
 projects(3).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF'];
 projects(3).listName='lowhigh.txt';
+projects(3).xlsname='lowhigh.xls';
 
 projects(4).Name='Human_pyr_harvest';
 projects(4).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Human_pyr_USA'];
@@ -49,19 +50,28 @@ projects(9).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Molnarg/S
 projects(9).listName='Spike transmission to human interneurons.txt';
 projects(9).xlsname='Spike transmission to human interneurons.xls';
 
+
 projects(10).Name='low-highNGF MG';
 projects(10).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF_MG'];
 projects(10).listName='lowhigh ngf harvested cells MG.txt';
 projects(10).xlsname='lowhigh ngf harvested cells MG.xls';
 
+projects(11).Name='low-high-FS';
+projects(11).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_FS'];
+projects(11).listName='lowhigh.txt';
+projects(11).xlsname='lowhigh.xls';
+
+
 projectdata=[];
 
 h=taxonomy_routines_starter(projects);
 uiwait(h);
+ivpercell=projectdata.ivpercell;%'all the IVs'; % the first (ivpercell) IVs will be used for each cell if the (ivpercell) variable is numeric. All the IVs will be used if this variable is not numeric.
 Selection=projectdata.projectnum;
 listPath=projects(Selection).listPath;
 listName=projects(Selection).listName;
 xlsname=projects(Selection).xlsname;
+%%
 if projectdata.importrawdata==1 | projectdata.collectfeatures==1
     taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell)% the class can be only one character!
 end
@@ -69,13 +79,20 @@ datasumDir=[listPath,'/datasums'];
 featDir=[listPath,'/datafiles'];
 ivdir=[listPath,'/IVs'];
 projectName=[];
+%%
 [cls, ~, ~, ~] = readInFileList(listPath,listName);% the class can be only one character!
-cls=num2str(unique(cls));% the class can be only one character!
-if size(cls,1)>size(cls,2)
-    cls=cls';
+cls=unique(cls);% the class can be only one character!
+clabels={};
+for i=1:length(cls)
+    clabels{i}=num2str(cls(i));
 end
-cls(strfind(cls,' '))=[];% the class can be only one character!
-clabels=cls;
+% %%
+% if size(cls,1)>size(cls,2)
+%     cls=cls';
+% end
+% cls=num2str(cls);
+% cls(strfind(cls,' '))=[];% the class can be only one character!
+% clabels=cls;
 if projectdata.importrawdata==1 || projectdata.collectfeatures==1
     %% locating files
     [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
@@ -87,7 +104,7 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
             delete([featDir,'/*.mat']);
         else
             for i=1:length(clabels)
-                delete([featDir,'/',clabels(i),'/*.mat']);
+                delete([featDir,'/',clabels{i},'/*.mat']);
             end
         end
         processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
@@ -102,8 +119,8 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
             collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,projectdata.exportivs,clabels);
         else
             for i=1:length(clabels)
-                delete([datasumDir,'/',clabels(i),'/*.mat']);
-                collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,projectdata.exportivs,clabels(i),extractor);
+                delete([datasumDir,'/',clabels{i},'/*.mat']);
+                collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,projectdata.exportivs,clabels{i},extractor);
             end
         end
     end
@@ -119,7 +136,7 @@ for i=1:hossz
     if isempty(clabels)
         datasumDirnow=[datasumDir,'/'];
     else
-        datasumDirnow=[datasumDir,'/',clabels(i)];
+        datasumDirnow=[datasumDir,'/',clabels{i}];
     end
     fnames=dir(datasumDirnow);
     fnames([fnames.isdir])=[];
@@ -134,7 +151,7 @@ for i=1:hossz
         if isempty(clabels)
             datasum.class=[];
         else
-            datasum.class=str2num(clabels(i));
+            datasum.class=str2num(clabels{i});
         end
         
         if isempty(fieldnames(DATASUM))
@@ -149,7 +166,7 @@ for i=1:hossz
             if isempty(clabels)
                 save([ivdir,'/',datasum.fname,'.mat'],'iv');
             else
-                save([ivdir,'/',clabels(i),'/',datasum.fname,'.mat'],'iv');
+                save([ivdir,'/',clabels{i},'/',datasum.fname,'.mat'],'iv');
             end
             
             %             figure(1)

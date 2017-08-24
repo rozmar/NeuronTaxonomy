@@ -1,35 +1,25 @@
-function plotFeatures(datasumPath,imgOutputDir,featureIndex)
-	
-	load([datasumPath,"/datasumMatrix.mat"],"datasumMatrix");
-	load([datasumPath,"/featureList.mat"],"featureList");
-	
-	A = datasumMatrix.A;
-	B = datasumMatrix.B;
-	
-	if nargin==3
-		for i=1:size(featureIndex,1)
-			figure(i,"visible","off");
-			clf;
-			hold on;
-			plot(A(:,featureIndex(i)+1),repmat(0,1,size(A,1)),'r@');
-			plot(B(:,featureIndex(i)+1),repmat(0,1,size(B,1)),'b@');
-			title(featureList{featureIndex(i)});
-			ylim([-1 1]);
-			hold off;
-			saveas(gcf,[imgOutputDir,"/",featureList{featureIndex(i)},'.png']);
-		end
 
-	else
-		for i=2:length(featureList)
-			figure(i,"visible","off");
-			clf;
-			hold on;
-			plot(A(:,i),repmat(0,1,size(A,1)),'r@');
-			plot(B(:,i),repmat(0,1,size(B,1)),'b@');
-			title(featureList{i});
-			ylim([-1 1]);
-			hold off;
-			saveas(gcf,[imgOutputDir,"/",featureList{i-1},'.png']);
-		end
-	end
+PM = makePermutation(length(featureMatrix),2);
+
+for i = 1 : size(PM,1)
+  F = X(:,featureMatrix(PM(i,:)));
+  %IDX = [];
+  %for j = 1 : 1000 
+  % idx = kmeans(F,2,'emptyaction','singleton');
+  % if idx(1)==2
+  %   idx = ones(size(idx)).*3 .- idx;
+  % end
+  % IDX = [ IDX ; idx' ];
+  %end
+  %idx = mode(IDX);
+  idx=WID(j,:);
+  figure(i,'visible','on'); clf; hold on;
+  plot(F(idx==1,1),F(idx==1,2),'ro','markersize',5,'linewidth',1);
+  plot(F(idx==0,1),F(idx==0,2),'bs','markersize',5,'linewidth',1);
+  plot(F(y==1,1),F(y==1,2),'ro','markersize',5,'linewidth',1,'markerfacecolor','r');
+  plot(F(y==0,1),F(y==0,2),'bs','markersize',5,'linewidth',1,'markerfacecolor','b');
+  title([featureList{featureMatrix(PM(i,1))},'-',featureList{featureMatrix(PM(i,2))}]);
+  hold off;
+  
+  print(i,['/home/borde/',featureList{featureMatrix(PM(i,1))},'-',featureList{featureMatrix(PM(i,2))}],'-dsvg');
 end
