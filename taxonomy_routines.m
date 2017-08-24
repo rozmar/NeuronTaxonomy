@@ -50,10 +50,17 @@ projects(9).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Molnarg/S
 projects(9).listName='Spike transmission to human interneurons.txt';
 projects(9).xlsname='Spike transmission to human interneurons.xls';
 
-projects(10).Name='low-high-FS';
-projects(10).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_FS'];
-projects(10).listName='lowhigh.txt';
-projects(10).xlsname='lowhigh.xls';
+
+projects(10).Name='low-highNGF MG';
+projects(10).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF_MG'];
+projects(10).listName='lowhigh ngf harvested cells MG.txt';
+projects(10).xlsname='lowhigh ngf harvested cells MG.xls';
+
+projects(11).Name='low-high-FS';
+projects(11).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_FS'];
+projects(11).listName='lowhigh.txt';
+projects(11).xlsname='lowhigh.xls';
+
 
 projectdata=[];
 

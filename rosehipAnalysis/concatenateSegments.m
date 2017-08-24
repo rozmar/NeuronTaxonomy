@@ -21,10 +21,15 @@ function newSliceStructure = concatenateSegments(sliceStructure)
   % Calculate the new length (sum of old lengths)
   newSliceStructure.length = length(newSliceStructure.values);
   
+  % Mean value of signal
+  newSliceStructure.meanVal = mean([sliceStructure(:).meanVal]);
+  
   % Generate new time vector
   newSliceStructure.times  =...
       generateTimeVector(newSliceStructure.length, sampleInterval);
 
+  % Duration of segment in seconds
+  newSliceStructure.duration = diff(newSliceStructure.times([1,end]));
 end
 
 function timeVector = generateTimeVector(vectorLength, sInterval)
