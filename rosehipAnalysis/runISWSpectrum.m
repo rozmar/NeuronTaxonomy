@@ -8,8 +8,8 @@ clear parameters;
 %% ==================================
 %  Input parameters
 %% ==================================
-parameters.datasumDir = 'E:\Data\RHTEST\datasum';
-parameters.featureDir = 'E:\Data\RHTEST\feature';
+parameters.datasumDir = '/home/fonok/Mount/TAR/ANALYSISdata/marci/_Taxonomy/human_rosehip/datasums/';
+parameters.featureDir = '/home/fonok/Mount/TAR/ANALYSISdata/marci/_Taxonomy/human_rosehip/datafiles/';
 %% ==================================
 
 %% ==================================
@@ -51,11 +51,11 @@ parameters.wavelet.wavenumber = 9;
 %  Plotting parameters
 %% ==================================
 %  Minimal and maximal frequency to use
-parameters.plot.frequencyBound = [15,80];
+parameters.plot.frequencyBound = [10,80];
 %  Flag to display spectrogram for each segment
 parameters.plot.plotSpectrogram = 0;
 %  Flag to display power spectrum for each sweep
-parameters.plot.plotSinglePowerSpect = 1;
+parameters.plot.plotSinglePowerSpect = 0;
 %% ==================================
 
 
@@ -71,4 +71,4 @@ javaaddpath([utilBase,'poi_library/xmlbeans-2.3.0.jar']);
 javaaddpath([utilBase,'poi_library/dom4j-1.6.1.jar']);
 
 % Run script
-runSingleWavelet(parameters);
+calculateISWSpectrum(parameters);

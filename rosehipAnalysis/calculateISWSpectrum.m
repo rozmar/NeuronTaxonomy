@@ -64,6 +64,11 @@ function calculateISWSpectrum(parameters)
       
       % Calculate power for all sweep in this cell
       thisResult = calculateSingleCellWavelet(inputStructure, parameters);
+      
+      if isempty(thisResult)
+        continue;
+      end
+      
       thisResult.group   = ones(1,thisResult.numSweep).*g;
       thisResult.ID      = ones(1,thisResult.numSweep).*fileCounter;
       resultStructure{i} = thisResult;
@@ -118,6 +123,6 @@ end
 
 % Split datasum's filename into parts
 function nameStructure = splitDatasumFilename(fileName)
-  pattern = ['(?<pref>(datasum))', '_', '(?<id>(0*\d+))', '_', '(?<fname>(\d{7}\w{1,2}\.mat))', '_', '(?<post>(g\d+_s\d+_c\d+))', '.mat'];
+  pattern = ['(?<pref>(datasum))', '_', '(?<id>(0*\d+))', '_', '(?<fname>(\d{7}\w{1,2}\d?\.mat))', '_', '(?<post>(g\d+_s\d+_c\d+))', '.mat'];
   nameStructure = regexp(fileName, pattern, 'names');
 end
