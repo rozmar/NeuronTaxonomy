@@ -1,6 +1,6 @@
 %  setting path,generating txt
 close all
-clear all
+% clear all
 
 
 
@@ -61,6 +61,10 @@ projects(11).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high
 projects(11).listName='lowhigh.txt';
 projects(11).xlsname='lowhigh.xls';
 
+projects(12).Name='persistent firing_In Vivo';
+projects(12).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_invivo'];
+projects(12).listName='taxonomydata.txt';
+projects(12).xlsname='taxonomydata.xls';
 
 projectdata=[];
 
@@ -85,6 +89,9 @@ cls=unique(cls);% the class can be only one character!
 clabels={};
 for i=1:length(cls)
     clabels{i}=num2str(cls(i));
+end
+if length(clabels)==1;
+    clabels={};
 end
 % %%
 % if size(cls,1)>size(cls,2)
@@ -116,7 +123,7 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
         if isempty(clabels)
             delete([datasumDir,'/*.mat']);
             i=1;
-            collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,projectdata.exportivs,clabels);
+            collect_specified_features_from_dir(alltheivdata,featDir,datasumDir,projectdata.exportivs,[],extractor);
         else
             for i=1:length(clabels)
                 delete([datasumDir,'/',clabels{i},'/*.mat']);
@@ -149,7 +156,7 @@ for i=1:hossz
         datasum.fname=datasum.fname(hyps(2)+1:end-4);
         
         if isempty(clabels)
-            datasum.class=[];
+            datasum.class=NaN;
         else
             datasum.class=str2num(clabels{i});
         end
