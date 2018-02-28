@@ -1,6 +1,6 @@
 %  setting path,generating txt
 close all
-% clear all
+clear all
 
 
 
@@ -83,7 +83,19 @@ listName=projects(Selection).listName;
 xlsname=projects(Selection).xlsname;
 %%
 if projectdata.importrawdata==1 | projectdata.collectfeatures==1
-    taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell)% the class can be only one character!
+    [~,alltheivdata]=gethekafilepaths([],[],[locations.tgtardir,'MATLABdata/IV']);
+    missingfiles=taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell,alltheivdata);% the class can be only one character!
+    if ~isempty(missingfiles)
+        button = questdlg('Do you want to export the missing data from the HEKA .dat files?','Not all files exported.','Yes, export!','No thanks.','Yes, export!');
+        if strcmp(button,'Yes, export!')
+            while ~isempty(missingfiles)
+                hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
+                uiwait(hwarning);
+                HEKA_exportIVs_main(missingfiles);
+                missingfiles=taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell);% the class can be only one character!
+            end
+        end
+    end
 end
 datasumDir=[listPath,'/datasums'];
 featDir=[listPath,'/datafiles'];
@@ -258,7 +270,7 @@ if projectdata.generateXLSfile==1
                         constantstring=[num2str(uniqueclasses(firstclassi)),' vs ',num2str(uniqueclasses(secondclassi))];
                         if length(datforstat(secondclassi).data)>=4
                             [~,lillieps(2)]=lillietest(datforstat(secondclassi).data);
-                            
+                            runClassification
                         else
                             lillieps(2)=NaN;
                             
