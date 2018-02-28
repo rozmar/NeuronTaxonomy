@@ -164,12 +164,14 @@ function [resultStructure, parameters] = calculateSingleCellWavelet(inputStructu
   emptyMemPot = isnan(meanMembPotential);
   meanPowerSpectrum(emptyPower) = [];
   meanMembPotential(emptyMemPot) = [];
+
   segmentLength(emptyMemPot) = [];
   sweepISIVector(emptyMemPot) = [];
   
   if isempty(meanMembPotential)
     resultStructure = [];
     return;
+
   end
   %% --------------------------
   

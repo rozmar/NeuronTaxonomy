@@ -8,11 +8,13 @@ clear parameters;
 %% ==================================
 %  Input parameters
 %% ==================================
+
 % parameters.datasumDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datasums';
 % parameters.featureDir = 'E:\RHDATA\ANALYSISdata\marci\_Taxonomy\human_rosehip\datafiles';
 
 parameters.datasumDir = 'E:\Data\RHTESTNICE\datasums';
 parameters.featureDir = 'E:\Data\RHTESTNICE\datafiles';
+
 %% ==================================
 
 %% ==================================
@@ -58,6 +60,7 @@ parameters.wavelet.wavenumber = 9;
 %  Plotting parameters
 %% ==================================
 %  Minimal and maximal frequency to use
+
 parameters.plot.frequencyBound = [0,80];
 %  Flag to display spectrogram for each segment
 parameters.plot.plotSpectrogram = 0;

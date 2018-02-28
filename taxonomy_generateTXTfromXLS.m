@@ -68,6 +68,9 @@ for i=1:size(raw,1);
         end
 
     else
+        if ischar(s)
+            s=str2num(s);
+        end
         sidxes=ss==s;
     end
 
