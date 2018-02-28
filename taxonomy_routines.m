@@ -61,15 +61,21 @@ projects(11).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high
 projects(11).listName='lowhigh.txt';
 projects(11).xlsname='lowhigh.xls';
 
-projects(12).Name='persistent firing_In Vivo';
-projects(12).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_invivo'];
-projects(12).listName='taxonomydata.txt';
-projects(12).xlsname='taxonomydata.xls';
 
-projects(12).Name='persistent firing_slice';
-projects(12).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_slice'];
-projects(12).listName='taxonomydata.txt';
-projects(12).xlsname='taxonomydata.xls';
+projects(12).Name='low-highNGF MG batch#2';
+projects(12).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF_MG_2ndbatch'];
+projects(12).listName='lowhigh ngf harvested cells 2nd batch MG.txt';
+projects(12).xlsname='lowhigh ngf harvested cells 2nd batch MG.xls';
+
+projects(13).Name='persistent firing_In Vivo';
+projects(13).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_invivo'];
+projects(13).listName='taxonomydata.txt';
+projects(13).xlsname='taxonomydata.xls';
+
+projects(14).Name='persistent firing_slice';
+projects(14).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_slice'];
+projects(14).listName='taxonomydata.txt';
+projects(14).xlsname='taxonomydata.xls';
 
 
 projectdata=[];
