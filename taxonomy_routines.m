@@ -1,6 +1,6 @@
 %  setting path,generating txt
 close all
-clear all
+%clear all
 
 
 
@@ -11,9 +11,10 @@ projects(1).Name='quantal';
 projects(1).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/quantal'];
 projects(1).listName='mg.txt';
 
-projects(2).Name='humanNGF-old';
+projects(2).Name='human_NGF';
 projects(2).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_NGF'];
-projects(2).listName='realngfcelldata.txt';
+projects(2).listName='human_NGF.txt';
+projects(2).xlsname='human_NGF.xls';
 
 projects(3).Name='low-high-NGF';
 projects(3).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Low_high_glucose_NGF'];
@@ -77,6 +78,10 @@ projects(14).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persiste
 projects(14).listName='taxonomydata.txt';
 projects(14).xlsname='taxonomydata.xls';
 
+projects(15).Name='Autopatcher';
+projects(15).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Autopatcher'];
+projects(15).listName='autopatch.txt';
+projects(15).xlsname='autopatch.xls';
 
 projectdata=[];
 
@@ -91,6 +96,10 @@ xlsname=projects(Selection).xlsname;
 if projectdata.importrawdata==1 | projectdata.collectfeatures==1
     [~,alltheivdata]=gethekafilepaths([],[],[locations.tgtardir,'MATLABdata/IV']);
     missingfiles=taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell,alltheivdata);% the class can be only one character!
+    if projectdata.reexportALLHEKAfiles==1
+        [~, ~, missingfiles, ~] = readInFileList(listPath,listName);
+        missingfiles=unique(missingfiles);
+    end
     if ~isempty(missingfiles)
         button = questdlg('Do you want to export the missing data from the HEKA .dat files?','Not all files exported.','Yes, export!','No thanks.','Yes, export!');
         if strcmp(button,'Yes, export!')
@@ -158,6 +167,7 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
 end
 %% generating DATASUM exporting IV files if needed
 DATASUM=struct;
+warningshown=false;
 if isempty(clabels)
     hossz=1;
 else
@@ -180,17 +190,96 @@ for i=1:hossz
         datasum.fname=datasum.fname(hyps(2)+1:end-4);
         
         if isempty(clabels)
-            datasum.class=NaN;
+            datasum.class=1;
         else
             datasum.class=str2num(clabels{i});
         end
         
+         %saving IVtime and time of first recording on that day
+        %% this is based on TreeData it is faster and more roboust but older files have no TreeData..so it has to export it..
+        
+        fname=datasum.fname;
+        if ~any(strcmp(fname,{'0509161cs.mat_g1_s4_c1'}))
+            hyps=strfind(fname,'_');
+            hyps=hyps(end-2:end);
+            gscstring=fname(hyps(1)+1:end);
+            fname=fname(1:hyps(1)-5);
+            if ~exist('alltheivdata','var')
+                [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
+            end
+            fidx=find(strcmp([fname,'.mat'],alltheivdata.fnames),1,'first');
+            pathtofile=alltheivdata.paths{fidx};
+            hely=strfind(pathtofile,'IV');
+            pathtofile=[pathtofile(1:hely-1),'TreeData',pathtofile(hely+2:end)];
+            a=dir([pathtofile,'/',fname,'.mat']);
+            if isempty(a)
+                pathtohekafile=alltheivdata.paths{fidx};
+                hely=strfind(pathtohekafile,'MATLABdata');
+                pathtohekafile=[pathtohekafile(1:hely-1),'HEKAdata',pathtohekafile(hely+13:end)];
+                hekafnames=[];
+                hekafnames{1,1}=pathtohekafile;
+                hekafnames{1,2}=[fname,'.dat'];
+                if warningshown==false
+                    hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
+                    uiwait(hwarning);
+                    warningshown=true;
+                end
+                hiba=HEKA_exporttreeinfo_main(hekafnames);
+            end
+            temp=load([pathtofile,'/',fname]);
+            hyps=strfind(gscstring,'_');
+            g=str2num(gscstring(2:hyps(1)-1));
+            s=str2num(gscstring(hyps(1)+2:hyps(2)-1));
+            c=str2num(gscstring(hyps(2)+2:end));
+            ividx=find(temp.seriesnums(:,1)==g & temp.seriesnums(:,2)==s);
+            datasum.IVtime=temp.seriesdata(ividx).realtime;
+            idxofthatday=find(~cellfun(@isempty,regexp(alltheivdata.fnames,fname(1:6))));
+            starttimes=[];
+            for fileidxi=1:length(idxofthatday)
+                pathtofile=alltheivdata.paths{idxofthatday(fileidxi)};
+                hely=strfind(pathtofile,'IV');
+                pathtofile=[pathtofile(1:hely-1),'TreeData',pathtofile(hely+2:end)];
+                a=dir([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+                if isempty(a)
+                    pathtohekafile=alltheivdata.paths{idxofthatday(fileidxi)};
+                    hely=strfind(pathtohekafile,'MATLABdata');
+                    pathtohekafile=[pathtohekafile(1:hely-1),'HEKAdata',pathtohekafile(hely+13:end)];
+                    hekafnames=[];
+                    hekafnames{1,1}=pathtohekafile;
+                    newhekafname=alltheivdata.fnames{idxofthatday(fileidxi)};
+                    hekafnames{1,2}=[newhekafname(1:end-3),'dat'];
+                    a=dir([hekafnames{1,1},'/',hekafnames{1,2}]);
+                    if ~isempty(a)
+                        if warningshown==false
+                            hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
+                            uiwait(hwarning);
+                            warningshown=true;
+                        end
+                        hiba=HEKA_exporttreeinfo_main(hekafnames);
+                    else
+                        disp(['HEKA dat file: ',hekafnames{1,2},' not found']);
+                    end
+                end
+                a=dir([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+                if ~isempty(a)
+                    temp=load([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+                    starttimes(fileidxi)=temp.seriesdata(1).realtime(1);
+                end
+            end
+            starttimes(starttimes<28800)=[]; % what happens earlier than 8AM is deleted because it belongs to the next day
+            %%
+            datasum.firstrecordingtimethatday=min(starttimes);
+        else
+            datasum.firstrecordingtimethatday=NaN;
+            datasum.IVtime=NaN;
+        end
         if isempty(fieldnames(DATASUM))
             NEXT=1;
             clear DATASUM
         else
             NEXT=length(DATASUM)+1;
         end
+        
         DATASUM(NEXT)=datasum;
         if projectdata.exportivs==1
             iv=DATASUM(fnum).iv;
@@ -208,6 +297,8 @@ for i=1:hossz
             %             title(datasum.fname)
             %             axis tight
             %                     pause
+            
+            
         end
     end
 end
@@ -276,7 +367,7 @@ if projectdata.generateXLSfile==1
                         constantstring=[num2str(uniqueclasses(firstclassi)),' vs ',num2str(uniqueclasses(secondclassi))];
                         if length(datforstat(secondclassi).data)>=4
                             [~,lillieps(2)]=lillietest(datforstat(secondclassi).data);
-                            runClassification
+%                             runClassification
                         else
                             lillieps(2)=NaN;
                             
@@ -312,6 +403,7 @@ end
 if projectdata.doPCA==1
     taxonomy_pca_differences_between_groups(DATASUM)
 end
+save([listPath,'/datasumMatrix.mat'],'DATASUM','-v7.3');
 return
 %% balázs reobase+curr accomodation
 dataneeded=struct;
@@ -570,3 +662,38 @@ plot(mean([APwaves(AACezeket).ddVperdtT],2),mean([APwaves(AACezeket).ddVperdt],2
 axis tight
 xlabel('time (s)')
 ylabel('d^2V/dt^2 (V/s^2)')
+
+%% cluster analysis
+close all
+DATAforclust=DATASUM;
+DATAforclust_normalized=[];
+fieldnamek=fieldnames(DATASUM);
+fieldnamestodel={'RS','si','fname','ID','class','iv'};
+for i=1:length(fieldnamestodel)
+    fieldnamek(strcmp(fieldnamek,fieldnamestodel{i}))=[];
+
+end
+reali=0;
+for i=1:length(fieldnamek)
+    if any(isnan([DATAforclust.(fieldnamek{i})]))% | any(strcmp(fieldnamek{i},{'RS','si','fname','ID','class'}))
+        DATAforclust=rmfield(DATAforclust,fieldnamek{i});
+    else
+        reali=reali+1;
+%         DATAforclust_normalized.(fieldnamek{i})=zscore([DATAforclust.(fieldnamek{i})],1);
+        DATAforclust_normalized.data(:,reali)=zscore([DATAforclust.(fieldnamek{i})],1);
+        DATAforclust_normalized.header{reali}=fieldnamek{i};
+    end
+end
+
+[COEFF,SCORE,latent,tsquare] = princomp(DATAforclust_normalized.data);
+
+Y = pdist(DATAforclust_normalized.data);
+% Y = pdist(SCORE(:,1:10));
+
+Z = linkage(Y);
+[H,T,outperm]=dendrogram(Z,0,'Orientation','left');
+dendrogram(Z,0,'Orientation','left','Label',{DATASUM(outperm).ID});
+% c = cophenet(Z,Y)
+
+% [COEFF,SCORE,latent,tsquare] = princomp(DATAforclust_normalized.data);
+

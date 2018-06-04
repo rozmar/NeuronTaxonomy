@@ -7,6 +7,17 @@ function [cls id name iv] = readInFileList(fpath,fileName)
 	file = [fpath,'/',fileName];			%absolute file name
 	f=fopen(file,'r');				%open file
 	[cls id name g s c] = textread(file,'%d %s %s %2d %2d %2d');	%read data
+    %% HOTFIX - sometimes empty lines are read...
+    todel=find(strcmp(name,''));
+    if ~isempty(todel)
+        cls(todel)=[];
+        id(todel)=[];
+        name(todel)=[];
+        g(todel)=[];
+        s(todel)=[];
+        c(todel)=[];
+    end
+    %%
 	%name=cell2mat(name);				%convert name to matrix
 	iv = {};
 	for i=1:size(cls,1)

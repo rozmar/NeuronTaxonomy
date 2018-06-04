@@ -117,6 +117,15 @@ for i=1:size(raw,1);
         eddig=length(find(idxestodo));
     end
     findexes=find(idxestodo);
+    if eddig==0
+        fprintf('%s probably not exported properly\n', fname);
+       if isempty(missingfiles)
+           NEXT=1;
+       else
+           NEXT=length(missingfiles)+1;
+       end
+       missingfiles{NEXT}=fname;
+    end
     for iii=1:eddig
         gnow=num2str(gs(findexes(iii)));
         snow=num2str(ss(findexes(iii)));

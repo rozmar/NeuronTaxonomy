@@ -22,7 +22,7 @@ function varargout = taxonomy_routines_starter(varargin)
 
 % Edit the above text to modify the response to help taxonomy_routines_starter
 
-% Last Modified by GUIDE v2.5 22-Sep-2016 15:23:20
+% Last Modified by GUIDE v2.5 01-Jun-2018 15:21:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -89,6 +89,7 @@ handles.outputt.doPCA=get(handles.checkbox4,'Value');
 handles.outputt.doRosehipanal=get(handles.checkbox5,'Value');
 handles.outputt.generateXLSfile=get(handles.checkbox6,'Value');
 handles.outputt.ivpercell=get(handles.checkbox7,'Value');
+handles.outputt.reexportALLHEKAfiles=get(handles.checkbox8,'Value');
 if ~handles.outputt.ivpercell
     handles.outputt.ivpercell='export every damn IV';
 end
@@ -178,3 +179,12 @@ function checkbox7_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox7
+
+
+% --- Executes on button press in checkbox8.
+function checkbox8_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox8

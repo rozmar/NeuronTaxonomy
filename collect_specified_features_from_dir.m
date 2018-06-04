@@ -33,8 +33,10 @@ function datasums = collect_specified_features_from_dir(ivinputDir,featinputDir,
             ivname = parts{4};
             cellname = [parts{5},'_',parts{6},'_',parts{7}(1:strfind(parts{7},'.')-1)];
         else
-            id = strcat(parts{3},'_',parts{4});
-            ivname = parts{5};
+%             id = strcat(parts{3},'_',parts{4});
+%             ivname = parts{5};
+            id = parts{3};
+            ivname = strcat(parts{4},'_',parts{5});
             cellname = [parts{6},'_',parts{7},'_',parts{8}(1:strfind(parts{8},'.')-1)];
         end
         

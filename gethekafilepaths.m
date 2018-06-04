@@ -24,6 +24,7 @@ while ~isempty(dirstocheck)
     dirstocheck(1)=[];
 end
 if ~isempty(listPath)
+
     [cls, id, name, ivname] = readInFileList(listPath,listName);
     for fnum=1:length(name)
         fnameidx(fnum)=find(strcmp(fnames,[char(name(fnum)),'.mat']),1,'first');
