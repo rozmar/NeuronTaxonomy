@@ -100,6 +100,7 @@ if projectdata.importrawdata==1 | projectdata.collectfeatures==1
         [~, ~, missingfiles, ~] = readInFileList(listPath,listName);
         missingfiles=unique(missingfiles);
     end
+    %%
     if ~isempty(missingfiles)
         button = questdlg('Do you want to export the missing data from the HEKA .dat files?','Not all files exported.','Yes, export!','No thanks.','Yes, export!');
         if strcmp(button,'Yes, export!')
