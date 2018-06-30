@@ -81,7 +81,7 @@ function runbutton_Callback(hObject, eventdata, handles)
   isInCorrect = checkParams(handles);
   
   [locations]=marcicucca_locations;
-  path=[locations.matlabstuffdir,'NotMine/20130227_xlwrite/'];
+  path=[locations.matlabstuffdir,'20130227_xlwrite/'];
   javaaddpath([path 'poi_library/poi-3.8-20120326.jar']);
   javaaddpath([path 'poi_library/poi-ooxml-3.8-20120326.jar']);
   javaaddpath([path 'poi_library/poi-ooxml-schemas-3.8-20120326.jar']);

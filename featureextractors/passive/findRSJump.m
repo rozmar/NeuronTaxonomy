@@ -104,17 +104,25 @@ function [taustart vrs] = findRSJump(x,Y,currents,sampleInterval,hundredMicsStep
 	[minNegD,minNegDPos]=nanmin(negDeriv);
 % 	minNegDPos=find(negDeriv==minNegD,1,'first');
 %%
-    while minNegD<negDeriv(minNegDPos+1) & minNegDPos<length(negDeriv)-1
-        minNegDPos=minNegDPos+1;
-        minNegD=negDeriv(minNegDPos);
+    if isnan(minNegD)
+        minNegDPos=NaN;
+    else
+        while minNegD<negDeriv(minNegDPos+1) & minNegDPos<length(negDeriv)-1
+            minNegDPos=minNegDPos+1;
+            minNegD=negDeriv(minNegDPos);
+        end
     end
 %%
 	%find the max. derivative in the positive IVs then look for the end of
 	%the RS artefact
 	[maxPosD,maxPosDPos]=nanmax(posDeriv);
-    while maxPosD>posDeriv(maxPosDPos+1) & maxPosDPos<length(posDeriv)-1
-        maxPosDPos=maxPosDPos+1;
-        maxPosD=posDeriv(maxPosDPos);
+    if isnan(maxPosD)
+        maxPosDPos=NaN;
+    else
+        while maxPosD>posDeriv(maxPosDPos+1) & maxPosDPos<length(posDeriv)-1
+            maxPosDPos=maxPosDPos+1;
+            maxPosD=posDeriv(maxPosDPos);
+        end
     end
 % 	maxPosDPos=find(posDeriv==maxPosD,1,'first');
 			

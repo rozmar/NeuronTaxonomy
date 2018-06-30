@@ -26,6 +26,8 @@ function [v0 dvrs] = calculateV0BySweep(x,Y,taustart,hundredMicsStep,vrs,current
     if isempty(RS)
         RS=median((-dvrs./current));
     end
-    
+    if RS<10^-6
+        disp('hm')
+    end
     dvrs=-RS*(current);
 end
