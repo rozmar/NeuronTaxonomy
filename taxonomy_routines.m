@@ -66,10 +66,10 @@ projects(12).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persiste
 projects(12).listName='taxonomydata.txt';
 projects(12).xlsname='taxonomydata.xls';
 
-projects(12).Name='persistent firing_slice';
-projects(12).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_slice'];
-projects(12).listName='taxonomydata.txt';
-projects(12).xlsname='taxonomydata.xls';
+projects(13).Name='persistent firing_slice';
+projects(13).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/persistent_slice'];
+projects(13).listName='taxonomydata.txt';
+projects(13).xlsname='taxonomydata.xls';
 
 
 projectdata=[];

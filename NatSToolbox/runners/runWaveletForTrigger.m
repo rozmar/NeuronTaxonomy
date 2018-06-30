@@ -11,10 +11,10 @@ clear parameters functionStructure;
 %% ==========================================
 % Input directory path. The files can be selected
 % from a list later.
-parameters.input.dir = 'E:\Data\FSMATDC\Desc';
+parameters.input.dir = [dirs.PSDdir];
 % Output directory. The results (plot, data) will
 % be saved here.
-parameters.output.dir = 'E:\WholeFSDeltaAnalysisResult\TriggeredWaveletWithSpike\Desc';
+parameters.output.dir = [dirs.PSDdir];
 %% ==========================================
 
 %% ==========================================
