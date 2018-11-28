@@ -18,7 +18,7 @@ function datasum = basic_features(cell,current,time)
     
     rsagnum=min([sum(current<0),2]);
     rsagnum=1;
-    datasum.bridgedRS=mean(cell.bridgedRS);
+%     datasum.bridgedRS=mean(cell.bridgedRS);
     datasum.sag = cell.rsag(1:rsagnum) ./ rinall(1:rsagnum);
     datasum.sag = nanmean(datasum.sag(1:rsagnum));
     datasum.rin = nanmean(rinall(1:rsagnum));
