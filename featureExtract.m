@@ -17,7 +17,9 @@ plotPassive	= 0;
 plotActive	= 0;
 
 x = iv.time;
-bridgedRS=iv.bridgedRS;
+if isfield(iv,'bridgedRS')
+    bridgedRS=iv.bridgedRS;
+end
 lastHypSecToCount = 0.1;
 movingaverageforsag=.01;
 tresholdvalue=10;
@@ -25,7 +27,9 @@ minapamplitude=20; % amplitude of minimal AP amplitude to be recognized
 sampleInterval = x(2) - x(1); 				%difference between two sample point in time (in secundum)
 samplingRate = 1 / sampleInterval; 			%samplingrate, number of sample points in one second
 cellStruct.samplingRate  = samplingRate;
-cellStruct.bridgedRS  = bridgedRS;
+if isfield(iv,'bridgedRS')
+    cellStruct.bridgedRS  = bridgedRS;
+end
 hundredMicsStep = max(floor(.0001 / sampleInterval ),1);	%number of sample points in 100 microseconds, can't be less than 1
 
 Y = sweepToMatrix(iv);					%create matrix from IV-s (if the new format of IV files are used, it's unnecessary)
