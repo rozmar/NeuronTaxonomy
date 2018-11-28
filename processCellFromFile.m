@@ -3,6 +3,10 @@
 %
 function processCellFromFile(fpath,fname,id,sourcepath,pathvar,cellname,dataDir)
 	[locations]=marcicucca_locations;
+    %debug
+    if any(strfind(fname,'1712011ap'))
+        disp('ittvane')
+    end
 	%kezdeti paraméterek
 	minsweepnum=3;
 	v0max=-.03;

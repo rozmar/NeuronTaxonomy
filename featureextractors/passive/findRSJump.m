@@ -10,23 +10,27 @@
 %  taustart - index of the RS jump
 %  vrs - value of the RS jump by sweep
 function [taustart vrs] = findRSJump(x,Y,currents,sampleInterval,hundredMicsStep,segments)
+	startPos = find(abs(x-segments(1)/1000)==min(abs(x-segments(1)/1000)),1,'first')+1;
+	maxLength=round(.0006/sampleInterval);
+	leftEnd = max([0,startPos-maxLength]);
+	rightEnd = min([length(x),startPos+maxLength]);
+	x = x(leftEnd:rightEnd);
+    %%
 	%select the positive and negative sweeps
 	negSweeps = Y(find(currents<0),:);	
 	posSweeps = Y(find(currents>0),:);
 	
-	startPos = find(abs(x-segments(1)/1000)==min(abs(x-segments(1)/1000)),1,'first')+1;
-	maxLength=round(.0006/sampleInterval);
+
 
 	%create filter window
-	h = fspecial('average', [1 hundredMicsStep]);
+	h = fspecial('gaussian', [1 hundredMicsStep*3],hundredMicsStep/5);
 
     
-	leftEnd = max([0,startPos-maxLength]);
-	rightEnd = min([length(x),startPos+maxLength]);
+
 	
     	%filter the x value
 % 	x = imfilter(x,h);
-	x = x(leftEnd:rightEnd);
+
     
     %detecting outlying sweeps
     dprenegSweeps=diff(imfilter(negSweeps(:,leftEnd:rightEnd),h,'replicate'),1,2);

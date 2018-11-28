@@ -37,17 +37,18 @@ function [ apFeatures apNums ] = removeBadSpikes(apFeats,apNums)
           plot(thisSpike(4), thisSpike(5), 'kx', 'linewidth', 2, 'markersize', 10);
           hold off;
         end
-        
+        toRemove(j) = true;
         fprintf('Amplitude out of range: %f\n', thisSpike(16));
       end
-            
-      % Spike with the same threshold time will be noise
-      repeatingSpike = find(thisSweepSpikes(j+1:end,4)==thisSpike(4));
-      if ~isempty(repeatingSpike)
-        repeatingSpike = repeatingSpike + ones(size(repeatingSpike,1),1)*j;
-        toRemove(repeatingSpike) = true;
+      
+      if toRemove(j) == false
+          % Spike with the same threshold time will be noise
+          repeatingSpike = find(thisSweepSpikes(j+1:end,4)==thisSpike(4));
+          if ~isempty(repeatingSpike)
+              repeatingSpike = repeatingSpike + ones(size(repeatingSpike,1),1)*j;
+              toRemove(repeatingSpike) = true;
+          end
       end
-            
     end
 						
     % If too many spikes have to be removed, all
