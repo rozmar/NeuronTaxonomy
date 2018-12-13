@@ -19,9 +19,9 @@ function scaleVector = createScale(range, step, scale)
     step = 0;
   end
     
-  if mod(diff(range),max(1, step))~=0
-    warning('Stepsize is not whole fraction of the range, some values will be cut from the end.');
-  end
+%   if mod(diff(range),max(1, step))~=0
+%     warning('Stepsize is not whole fraction of the range, some values will be cut from the end.');
+%   end
     
   if scale==LINEAR
     % Between 20 and 50 the default value 1
