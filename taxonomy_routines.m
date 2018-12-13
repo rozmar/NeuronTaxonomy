@@ -90,6 +90,11 @@ projects(16).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/Autopatc
 projects(16).listName='autopatch.txt';
 projects(16).xlsname='autopatch.xls';
 
+projects(17).Name='human-Anna';
+projects(17).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_anna'];
+projects(17).listName='human_anna.txt';
+projects(17).xlsname='human_anna.xlsx';
+
 projectdata=[];
 
 h=taxonomy_routines_starter(projects);

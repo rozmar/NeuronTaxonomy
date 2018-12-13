@@ -135,7 +135,7 @@ for i=1:size(raw,1);
 
 end
 
-%fclose(fileID);
+fclose(fileID);
 
     
 end
