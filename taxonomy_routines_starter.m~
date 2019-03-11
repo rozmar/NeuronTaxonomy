@@ -90,7 +90,6 @@ handles.outputt.doRosehipanal=get(handles.checkbox5,'Value');
 handles.outputt.generateXLSfile=get(handles.checkbox6,'Value');
 handles.outputt.ivpercell=get(handles.checkbox7,'Value');
 handles.outputt.reexportALLHEKAfiles=get(handles.checkbox8,'Value');
-handles.outputt.IV_viewer=get(handles.checkbox9,'Value');
 if ~handles.outputt.ivpercell
     handles.outputt.ivpercell='export every damn IV';
 end
@@ -197,22 +196,8 @@ function checkbox9_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if hObject.Value
-    handles.checkbox1.Enable='off';
-    handles.checkbox2.Enable='off';
-    handles.checkbox3.Enable='off';
-    handles.checkbox4.Enable='off';
-    handles.checkbox5.Enable='off';
-    handles.checkbox6.Enable='off';
-    handles.checkbox7.Enable='off';
-    handles.checkbox8.Enable='off';
+    handles.checkbox1.Enable=''
+    disp('lol')
 else
-    handles.checkbox1.Enable='on';
-    handles.checkbox2.Enable='on';
-    handles.checkbox3.Enable='on';
-    handles.checkbox4.Enable='on';
-    handles.checkbox5.Enable='on';
-    handles.checkbox6.Enable='on';
-    handles.checkbox7.Enable='on';
-    handles.checkbox8.Enable='on';
 end
 % Hint: get(hObject,'Value') returns toggle state of checkbox9

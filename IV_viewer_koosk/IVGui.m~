@@ -73,31 +73,15 @@ if isfield(iv,'realtime')
     handles.realtimeEdit.String = sprintf('%02d:%02d:%02.4f',h,m,s);
 else
     [h,m,s] = realtime2hms(iv.timertime(1));
-    handles.realtimeEdit.String = sprintf('%02d:%02d:%02.4f',h,m,s);
+    handles.timertimeEdit.String = sprintf('%02d:%02d:%02.4f',h,m,s);
 end
 [h,m,s] = realtime2hms(iv.timertime(1));
 handles.timertimeEdit.String = sprintf('%02d:%02d:%02.4f',h,m,s);
-if isfield(iv,'channellabel')
-    handles.channellabelEdit.String = iv.channellabel;
-else
-    handles.channellabelEdit.String ='not specified';
-end
-if isfield(iv,'preamplnum')
-    handles.preamplnumEdit.String = num2str(iv.preamplnum);
-else
-    handles.preamplnumEdit.String = 'not specified';
-end
+handles.channellabelEdit.String = iv.channellabel;
+handles.preamplnumEdit.String = num2str(iv.preamplnum);
 handles.holdingEdit.String = num2str(iv.holding);
-if isfield(iv,'recordingmode')
-    handles.recordingmodeEdit.String = iv.recordingmode;
-else
-    handles.recordingmodeEdit.String = 'not specified';
-end
-if isfield(iv,'AmplifierID')
-    handles.amplifierIdEdit.String = iv.AmplifierID;
-else
-    handles.amplifierIdEdit.String = 'not specified';
-end
+handles.recordingmodeEdit.String = iv.recordingmode;
+handles.amplifierIdEdit.String = iv.AmplifierID;
 handles.sweepnumEdit.String = num2str(iv.sweepnum);
 handles.segmentEdit.String = ['[', num2str(iv.segment(1)), ',', num2str(iv.segment(2)), ',', num2str(iv.segment(3)), ']'];
 handles.bridgedRSEdit.String = datasumEntry.class;

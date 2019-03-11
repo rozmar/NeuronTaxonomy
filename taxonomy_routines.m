@@ -104,6 +104,17 @@ Selection=projectdata.projectnum;
 listPath=projects(Selection).listPath;
 listName=projects(Selection).listName;
 xlsname=projects(Selection).xlsname;
+
+if projectdata.IV_viewer==1
+    load([listPath,'/datasumMatrix']);
+    datasum=DATASUM;
+    includeIdx=1:length(datasum);
+    humanOnlyIdx=1:length(datasum);
+    ratOnlyIdx=1:length(datasum);
+    vfig = IVViewer()
+    return
+end
+
 %%
 if projectdata.importrawdata==1 | projectdata.collectfeatures==1
     [~,alltheivdata]=gethekafilepaths([],[],[locations.tgtardir,'MATLABdata/IV']);

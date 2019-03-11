@@ -3,10 +3,11 @@
 % clear all
 close all
 % load('autopatch_treedata.mat')
-if ~strcmp(listPath(end),'/')
-    load([listPath,'/datasumMatrix.mat'])
+if ~strcmp(defPath(end),'/')
+    load([directory,'datasumMatrix.mat'])
 else
-    load([listPath,'datasumMatrix.mat'])
+    
+   
 end
 
 addpath('plotSpread')
@@ -273,10 +274,9 @@ ax.Box = 'Off'; ax.Color = color3;
 
 % figure('Name', 'RS (MOhm)')
 % h = scatter(1:numIncluded,rs); h.ButtonDownFcn = @(o,e) scatter_btndownfcn(o, e, chosenIdx, datasum);
-%%
 figure('Name', 'Resting potential (mV)')
 h = scatter(1:numIncluded,resting); h.ButtonDownFcn = @(o,e) scatter_btndownfcn(o, e, chosenIdx, datasum);
-%%
+
 f = figure('Name', 'Resting potential (mV)');
 sh = plotSpread(resting', 'categoryIdx', ones(numel(resting),1), 'distributionColors', {color1}, 'xValues', 0.9, 'spreadWidth', 0.15); hold on;
 boxplot(resting, 'Symbol', '', 'OutlierSize', 5, 'Colors', color1, 'Widths', 0.05); 
@@ -317,7 +317,7 @@ drawnow
 % ax.PlotBoxAspectRatioMode = 'manual';
 f.OuterPosition(1:2) = [700, 571];
 f.OuterPosition(3:4) = [236,245]; 
-%%
+
 
 % f = figure('Name', 'AP amplitude median(mV)');
 % sh = plotSpread(apamplitudemedian', 'categoryIdx', ones(numel(apamplitudemedian),1), 'distributionColors', {color1}, 'xValues', 0.87, 'spreadWidth', 0.15); hold on;
