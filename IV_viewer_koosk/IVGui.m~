@@ -250,8 +250,8 @@ sigma = model.gaussFilterSigma;
 for i = handles.ivList.Value
     filteredIV = iv.(['v',sprintf('%d',i)]);
     if sigma>0
-%         filteredIV = conv(filteredIV, fspecial('gaussian', [ceil(6*sigma-1), 1], sigma), 'same');
-        filteredIV = imfilter(filteredIV, fspecial('gaussian', [ceil(6*sigma-1), 1], sigma), 'replicate');
+        filteredIV = conv(filteredIV, fspecial('gaussian', [ceil(6*sigma-1), 1], sigma), 'same');
+        filteredIV = imilter(filteredIV, fspecial('gaussian', [ceil(6*sigma-1), 1], sigma), 'same');
     end
     plot(ax, iv.time, filteredIV, 'Color', 'blue');
 end
