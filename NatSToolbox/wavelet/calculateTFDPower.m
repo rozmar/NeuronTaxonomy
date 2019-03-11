@@ -172,6 +172,7 @@ function [PowerMatrix, frequencyVector, CoeffMatrix, PowerMatrixTrial] = calcula
         end
       else
         PowerMatrix(i,:) = abs(conv_fft).^2;
+        CoeffMatrix(i,:) = conv_fft;
       end
       
     end

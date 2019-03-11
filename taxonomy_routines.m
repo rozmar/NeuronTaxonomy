@@ -684,7 +684,6 @@ fieldnamek=fieldnames(DATASUM);
 fieldnamestodel={'RS','si','fname','ID','class','iv'};
 for i=1:length(fieldnamestodel)
     fieldnamek(strcmp(fieldnamek,fieldnamestodel{i}))=[];
-
 end
 reali=0;
 for i=1:length(fieldnamek)
