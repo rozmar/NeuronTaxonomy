@@ -114,6 +114,11 @@ if projectdata.IV_viewer==1
     vfig = IVViewer()
     return
 end
+if projectdata.doPCA==1
+    load([listPath,'/datasumMatrix']);
+    taxonomy_pca_differences_between_groups(DATASUM)
+    return
+end
 
 %%
 if projectdata.importrawdata==1 | projectdata.collectfeatures==1
@@ -424,9 +429,6 @@ if projectdata.generateXLSfile==1
     xlwrite([listPath,'/sumdata.xls'],datamatrix','Sheet 1',['C2']);%,char(length(DATASUM)+'A'),num2str(length(fieldek)+1)
 end
 
-if projectdata.doPCA==1
-    taxonomy_pca_differences_between_groups(DATASUM)
-end
 save([listPath,'/datasumMatrix.mat'],'DATASUM','-v7.3');
 return
 %% balázs reobase+curr accomodation
@@ -689,13 +691,18 @@ ylabel('d^2V/dt^2 (V/s^2)')
 
 %% cluster analysis
 close all
-DATAforclust=DATASUM;
+DATAforclust=DATASUM;%([DATASUM.class]<6 | [DATASUM.class]>7);
 DATAforclust_normalized=[];
 fieldnamek=fieldnames(DATASUM);
 fieldnamestodel={'RS','si','fname','ID','class','iv'};
 for i=1:length(fieldnamestodel)
     fieldnamek(strcmp(fieldnamek,fieldnamestodel{i}))=[];
 end
+% fieldnamepartstodel={'max','min','std'};
+% for i=1:length(fieldnamepartstodel)
+%     fieldnamek(cellfun(@any,strfind(fieldnamek,fieldnamepartstodel{i})))=[];
+% end
+
 reali=0;
 for i=1:length(fieldnamek)
     if any(isnan([DATAforclust.(fieldnamek{i})]))% | any(strcmp(fieldnamek{i},{'RS','si','fname','ID','class'}))
@@ -719,4 +726,16 @@ dendrogram(Z,0,'Orientation','left','Label',{DATASUM(outperm).ID});
 % c = cophenet(Z,Y)
 
 % [COEFF,SCORE,latent,tsquare] = princomp(DATAforclust_normalized.data);
+%%
+class1idx=[DATAforclust.class]==1;
+class2idx=[DATAforclust.class]==9;
+figure(2)
+clf
+hold on
+plot3([SCORE(:,1)],[SCORE(:,2)],[SCORE(:,3)],'ko')
+plot3([SCORE(class1idx,1)],[SCORE(class1idx,2)],[SCORE(class1idx,3)],'ro','MarkerFaceColor',[0 0 0])
+plot3([SCORE(class2idx,1)],[SCORE(class2idx,2)],[SCORE(class2idx,3)],'ro','MarkerFaceColor',[1 0 0])
 
+%% PCA
+
+taxonomy_pca_differences_between_groups(DATASUM_PCA)

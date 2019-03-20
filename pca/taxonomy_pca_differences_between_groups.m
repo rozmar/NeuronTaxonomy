@@ -10,6 +10,7 @@ mergecorrelatingvals=0; % use only one from the correlating variables
 corrpval=.001; % threshold for correlation (p)
 count=500; %the number of variables included in the PCA
 
+
 %% csoport hisztogramok
 close all
 fieldek=fieldnames(DATASUM);
@@ -26,7 +27,7 @@ for fieldnum=1:length(fieldek)
         clear datanow
         for i=1:length(csoporok)
             alldata=[DATASUM.(fieldek{fieldnum})];
-            range=[min(alldata):(max(alldata)-min(alldata))/20:max(alldata)];
+%             range=[min(alldata):(max(alldata)-min(alldata))/20:max(alldata)];
 %             subplot(length(csoporok)+1,1,1)
 %             hist(alldata,range)
 %             title(fieldek{fieldnum})
@@ -133,11 +134,11 @@ zlabel('3rd principal component')
 plot3(medians(1,1),medians(1,2),medians(1,3),'rx','MarkerSize',16,'LineWidth',3)
 plot3(medians(2,1),medians(2,2),medians(2,3),'bx','MarkerSize',16,'LineWidth',3)
 plot3(medians(:,1),medians(:,2),medians(:,3),'ko-','MarkerSize',16,'LineWidth',3)
+
 xlim([minval1 maxval1])
 ylim([minval2 maxval2])
 subplot(2,2,1)
 hold on
-
 [nall,xout]=hist(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),[minval1:step1:maxval1]);
 [n11,~]=hist(SCORE([DATASUM.class]==csoport1,1),xout);
 [n21,~]=hist(SCORE([DATASUM.class]==csoport2,1),xout);
@@ -148,8 +149,8 @@ set(bar1(3),'FaceColor',[1 0 0]) ;
 set(bar1,'barwidth',1) ;
 % bar(xout,n21,'b','FaceColor',[0 0 1])
 % bar(xout,n11,'r','FaceColor',[1 0 0])
-xlim([minval1 maxval1])
 
+xlim([minval1 maxval1])
 subplot(2,2,4)
 hold on
 [nall,xout]=hist(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),[minval2:step2:maxval2]);
@@ -162,6 +163,7 @@ set(bar1(3),'FaceColor',[1 0 0]) ;
 set(bar1,'barwidth',1) ;
 % barh(xout,n21,'b','FaceColor',[0 0 1])
 % barh(xout,n11,'r','FaceColor',[1 0 0])
+
 ylim([minval2 maxval2])
 
 

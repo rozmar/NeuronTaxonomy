@@ -6,7 +6,7 @@ function [cls id name iv] = readInFileList(fpath,fileName)
 %class filename g s c
 	file = [fpath,'/',fileName];			%absolute file name
 	f=fopen(file,'r');				%open file
-	[cls id name g s c] = textread(file,'%d %s %s %2d %2d %2d');	%read data
+	[cls id name g s c] = textread(file,'%d %s %s %2d %3d %2d');	%read data
     %% HOTFIX - sometimes empty lines are read...
     todel=find(strcmp(name,''));
     if ~isempty(todel)
