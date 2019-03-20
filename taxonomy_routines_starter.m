@@ -151,7 +151,25 @@ function checkbox4_Callback(hObject, eventdata, handles)
 % hObject    handle to checkbox4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+if hObject.Value
+    handles.checkbox1.Enable='off';
+    handles.checkbox2.Enable='off';
+    handles.checkbox3.Enable='off';
+    handles.checkbox5.Enable='off';
+    handles.checkbox6.Enable='off';
+    handles.checkbox7.Enable='off';
+    handles.checkbox8.Enable='off';
+    handles.checkbox9.Enable='off';
+else
+    handles.checkbox1.Enable='on';
+    handles.checkbox2.Enable='on';
+    handles.checkbox3.Enable='on';
+    handles.checkbox5.Enable='on';
+    handles.checkbox6.Enable='on';
+    handles.checkbox7.Enable='on';
+    handles.checkbox8.Enable='on';
+    handles.checkbox9.Enable='on';
+end
 % Hint: get(hObject,'Value') returns toggle state of checkbox4
 
 
