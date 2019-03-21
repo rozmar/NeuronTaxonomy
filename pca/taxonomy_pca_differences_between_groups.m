@@ -1,11 +1,13 @@
 function taxonomy_pca_differences_between_groups(DATASUM)
 %% variables
-csoport1=1;
-csoport2=2;
+csoport1=7;
+csoport2=8;
 signvalbetweengroups=.01; % significance level when comparing groups
+
 mergecorrelatingvals=0; % use only one from the correlating variables
 corrpval=.0000001; % threshold for correlation (p)
-count=6000; %the number of variables included in the PCA
+
+count=10; %the number of variables included in the PCA
 
 %% csoport hisztogramok
 close all
