@@ -87,6 +87,8 @@ function processCellFromFile(fpath,fname,id,sourcepath,pathvar,cellname,dataDir)
                     disp([fname,'_',cellname_current,' -- fail - holding current is greater than ',num2str(holdingmax)]);
                 elseif cell.sweepnum<minsweepnum 
                     disp([fname,'_',cellname_current,' -- fail - sweepnum is less than ',num2str(minsweepnum)]);
+                elseif size(cell.current,2)==0
+                    disp([fname,'_',cellname_current,' -- fail - no segment or stim data -  ']);
                 elseif ~(cell.current(1)<0) 
                     disp([fname,'_',cellname_current,' -- fail - first current is nonnegative -  ',num2str(cell.current(1))]);
                 elseif cell.current(length(cell.current))<=0

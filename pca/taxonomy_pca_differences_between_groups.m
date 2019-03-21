@@ -1,11 +1,17 @@
 function taxonomy_pca_differences_between_groups(DATASUM)
 %% variables
+csoportok=unique([DATASUM.class]);
+
 csoport1=7;
 csoport2=8;
+
+csoport1idx=find(csoportok==csoport1);
+csoport2idx=find(csoportok==csoport2);
+
 signvalbetweengroups=.01; % significance level when comparing groups
 
 mergecorrelatingvals=0; % use only one from the correlating variables
-corrpval=.0000001; % threshold for correlation (p)
+corrpval=.001; % threshold for correlation (p)
 
 count=10; %the number of variables included in the PCA
 
@@ -41,8 +47,9 @@ for fieldnum=1:length(fieldek)
 %         clf
 %         plot([DATASUM.class],alldata,'ko')
 %         xlim([0 5])
-        if sum(~isnan(datanow(csoport1).data)) >4 && sum(~isnan(datanow(csoport2).data)) >4
-            [p,h]=ranksum(datanow(csoport1).data,datanow(csoport2).data,signvalbetweengroups);
+
+        if sum(~isnan(datanow(csoport1idx).data)) >4 && sum(~isnan(datanow(csoport2idx).data)) >4
+            [p,h]=ranksum(datanow(csoport1idx).data,datanow(csoport2idx).data,signvalbetweengroups);
         else
 %             disp(fieldnum)
             p=1;
@@ -106,6 +113,21 @@ hold on
 [COEFF,SCORE,latent,tsquare] = princomp(zscore(princompmatrixnew));
 medians=[median(SCORE([DATASUM.class]==csoport1,1)),median(SCORE([DATASUM.class]==csoport1,2)),median(SCORE([DATASUM.class]==csoport1,3));median(SCORE([DATASUM.class]==csoport2,1)),median(SCORE([DATASUM.class]==csoport2,2)),median(SCORE([DATASUM.class]==csoport2,3))];
 
+% minval1=floor(min(SCORE(:,1))*2)/2;
+% maxval1=ceil(max(SCORE(:,1))*2)/2;
+% minval2=floor(min(SCORE(:,2))*2)/2;
+% maxval2=ceil(max(SCORE(:,2))*2)/2;
+percentiles=[.01 .99];
+score1vals=sort(SCORE(:,1),'ascend');
+score2vals=sort(SCORE(:,2),'ascend');
+minval1=floor(score1vals(round(length(score1vals)*percentiles(1)))*2)/2;
+maxval1=ceil(score1vals(round(length(score1vals)*percentiles(2)))*2)/2;
+minval2=floor(score2vals(round(length(score2vals)*percentiles(1)))*2)/2;
+maxval2=ceil(score2vals(round(length(score2vals)*percentiles(2)))*2)/2;
+
+binnum=10;
+step1=(maxval1-minval1)/binnum;
+step2=(maxval2-minval2)/binnum;
 plot3(SCORE([DATASUM.class]==csoport1,1),SCORE([DATASUM.class]==csoport1,2),SCORE([DATASUM.class]==csoport1,3),'ro','MarkerFaceColor',[1 0 0]);
 plot3(SCORE([DATASUM.class]==csoport2,1),SCORE([DATASUM.class]==csoport2,2),SCORE([DATASUM.class]==csoport2,3),'bo','MarkerFaceColor',[0 0 1]);
 plot3(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,2),SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,3),'ko','MarkerFaceColor',[1 1 1]);
@@ -116,11 +138,12 @@ zlabel('3rd principal component')
 plot3(medians(1,1),medians(1,2),medians(1,3),'rx','MarkerSize',16,'LineWidth',3)
 plot3(medians(2,1),medians(2,2),medians(2,3),'bx','MarkerSize',16,'LineWidth',3)
 plot3(medians(:,1),medians(:,2),medians(:,3),'ko-','MarkerSize',16,'LineWidth',3)
-xlim([-6 6])
-ylim([-6 6])
+
+xlim([minval1 maxval1])
+ylim([minval2 maxval2])
 subplot(2,2,1)
 hold on
-[nall,xout]=hist(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),[-6:.5:6]);
+[nall,xout]=hist(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),[minval1:step1:maxval1]);
 [n11,~]=hist(SCORE([DATASUM.class]==csoport1,1),xout);
 [n21,~]=hist(SCORE([DATASUM.class]==csoport2,1),xout);
 bar1=bar(xout,[nall;n21;n11]','grouped');%,'k','b','r','FaceColor',[1 1 1]
@@ -130,11 +153,11 @@ set(bar1(3),'FaceColor',[1 0 0]) ;
 set(bar1,'barwidth',1) ;
 % bar(xout,n21,'b','FaceColor',[0 0 1])
 % bar(xout,n11,'r','FaceColor',[1 0 0])
-xlim([-6 6])
 
+xlim([minval1 maxval1])
 subplot(2,2,4)
 hold on
-[nall,xout]=hist(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),[-6:.5:6]);
+[nall,xout]=hist(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),[minval2:step2:maxval2]);
 [n11,~]=hist(SCORE([DATASUM.class]==csoport1,2),xout);
 [n21,~]=hist(SCORE([DATASUM.class]==csoport2,2),xout);
 bar1=barh(xout,[nall;n21;n11]','grouped');%,'k','FaceColor',[1 1 1])
@@ -144,7 +167,8 @@ set(bar1(3),'FaceColor',[1 0 0]) ;
 set(bar1,'barwidth',1) ;
 % barh(xout,n21,'b','FaceColor',[0 0 1])
 % barh(xout,n11,'r','FaceColor',[1 0 0])
-ylim([-6 6])
+
+ylim([minval2 maxval2])
 
 
 figure(2)
