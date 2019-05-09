@@ -49,6 +49,8 @@ Y = sweepToMatrix(iv);					%create matrix from IV-s (if the new format of IV fil
 
 cellStruct.tau0_90risetime = getTauRiseTime(x,Y(find(iv.current<0),:),cellStruct.taustart,cellStruct.tauend,sampleInterval,samplingRate);
 
+cellStruct.tau0_63risetime = getTauRiseTimeWithFactor(Y(find(iv.current<0),:),cellStruct.taustart,cellStruct.tauend,sampleInterval, .632);
+
 pnum = length(find(iv.current<0));
 
 if plotPassive==1

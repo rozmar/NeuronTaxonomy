@@ -15,6 +15,7 @@ function datasum = basic_features(cell,current,time)
     datasum.rheobase = current(cell.rheobase);
     rinall = -cell.dvin ./ current * 1000000;
     datasum.tau0_90risetime = mean(cell.tau0_90risetime);
+    datasum.tau0_62risetime = mean(cell.tau0_62risetime);
     
     rsagnum=min([sum(current<0),2]);
     rsagnum=1;
