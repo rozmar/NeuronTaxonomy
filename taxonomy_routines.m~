@@ -8,27 +8,8 @@
 %           (listPath variable). The user can select which parts of the
 %           script should be run.
 %           - (2) once the project is selected, the User can choose to
-%           analyze the already exported data with
-%           taxonomy_pca_differences_between_groups.m and IVViewer.m.
-%           - (3) taxonomy_generateTXTfromXLS.m generates a txt file from
-%           the user generated xls file based on the user selection in the
-%           GUI. The later scripts will use this .txt file.
-%           - (4) HEKA_exportIVs_main.m exports elphys data from HEKA .dat
-%           files controlling a Fitmaster through batch communication.
-%           - (5) processRawIvs.m extracts features from the specified IVs
-%           and saves it in the listPath folder datafiles subfolder
-%           - (6) collect_specified_features_from_dir.m sums up the
-%           extracted features for each neuron. This process gives
-%           name-scalar value pairs which are easy to use in various (machine
-%           learning) algorithms. The data in saved in the listPath folder 
-%           datasums subfolder
-%           - (7) The datasums are collected in a single struct called
-%           DATASUM - This script also saves the time of the first
-%           recording that day (approximately the slice preparation time + 1 hr)
-%           This script might also need a Fitmaster to run.
-%           - (8) Statistics are done and exported in an .xls file.
-% To expand the number of projects, add a new member to the projects struct
-% and generate the corresponding folder system.
+%           analyze the already exported data with taxonomy_pca_differences_between_groups
+
 
 %% (1) setting path,generating txt
 close all
@@ -121,11 +102,6 @@ projects(17).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_an
 projects(17).listName='human_anna.txt';
 projects(17).xlsname='human_anna.xlsx';
 
-projects(18).Name='human_rat_NGFC_Norbi';
-projects(18).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_rat_NGFC_Norbi'];
-projects(18).listName='human_rat_NGFC_Norbi.txt';
-projects(18).xlsname='human_rat_NGFC_Norbi.xlsx';
-
 projectdata=[];
 
 h=taxonomy_routines_starter(projects);
@@ -153,14 +129,13 @@ end
 
 %%
 if projectdata.importrawdata==1 | projectdata.collectfeatures==1
-    %% (3) generating the TXT file 
     [~,alltheivdata]=gethekafilepaths([],[],[locations.tgtardir,'MATLABdata/IV']);
     missingfiles=taxonomy_generateTXTfromXLS(listPath,listName,xlsname,ivpercell,alltheivdata);% the class can be only one character!
     if projectdata.reexportALLHEKAfiles==1
         [~, ~, missingfiles, ~] = readInFileList(listPath,listName);
         missingfiles=unique(missingfiles);
     end
-    %% (4) exporting raw data from HEKA .dat files
+    %%
     if ~isempty(missingfiles)
         button = questdlg('Do you want to export the missing data from the HEKA .dat files?','Not all files exported.','Yes, export!','No thanks.','Yes, export!');
         if strcmp(button,'Yes, export!')
@@ -198,7 +173,7 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
     %% locating files
     [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
     inputDir=paths;
-    %% (5) extracting features
+    %% extracting features
     % button = questdlg('Would you like to export raw IVs?','raw export','yes','no','yes');
     if projectdata.importrawdata==1%strcmp(button,'yes')
         if isempty(clabels)
@@ -210,7 +185,7 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
         end
         processRawIvs(listPath,listName,inputDir,featDir,projectName, clabels);
     end
-    %% (6) collecting specified features
+    %% collecting specified features
     extractor = @basic_features;
     % button = questdlg('Would you like to collect features?','collect features','yes','no','yes');
     if projectdata.collectfeatures==1 %strcmp(button,'yes')
@@ -226,7 +201,7 @@ if projectdata.importrawdata==1 || projectdata.collectfeatures==1
         end
     end
 end
-%% (7) generating DATASUM exporting IV files if needed
+%% generating DATASUM exporting IV files if needed
 DATASUM=struct;
 warningshown=false;
 if isempty(clabels)
@@ -256,78 +231,84 @@ for i=1:hossz
             datasum.class=str2num(clabels{i});
         end
         
-        %% saving IVtime and time of first recording on that day (for this purpose all the files that were recorded that day must be opened)
+         %saving IVtime and time of first recording on that day
+        %% this is based on TreeData it is faster and more roboust but older files have no TreeData..so it has to export it..
         
         fname=datasum.fname;
-        hyps=strfind(fname,'_');
-        hyps=hyps(end-2:end);
-        gscstring=fname(hyps(1)+1:end);
-        fname=fname(1:hyps(1)-5);
-        if ~exist('alltheivdata','var')
-            [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
-        end
-        fidx=find(strcmp([fname,'.mat'],alltheivdata.fnames),1,'first');
-        pathtofile=alltheivdata.paths{fidx};
-        hely=strfind(pathtofile,'IV');
-        pathtofile=[pathtofile(1:hely-1),'TreeData',pathtofile(hely+2:end)];
-        a=dir([pathtofile,'/',fname,'.mat']);
-        if isempty(a)
-            pathtohekafile=alltheivdata.paths{fidx};
-            hely=strfind(pathtohekafile,'MATLABdata');
-            pathtohekafile=[pathtohekafile(1:hely-1),'HEKAdata',pathtohekafile(hely+13:end)];
-            hekafnames=[];
-            hekafnames{1,1}=pathtohekafile;
-            hekafnames{1,2}=[fname,'.dat'];
-            if warningshown==false
-                hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
-                uiwait(hwarning);
-                warningshown=true;
+        if ~any(strcmp(fname,{'0509161cs.mat_g1_s4_c1'}))
+            hyps=strfind(fname,'_');
+            hyps=hyps(end-2:end);
+            gscstring=fname(hyps(1)+1:end);
+            fname=fname(1:hyps(1)-5);
+            if ~exist('alltheivdata','var')
+                [paths,alltheivdata]=gethekafilepaths(listPath,listName,defPath);
             end
-            hiba=HEKA_exporttreeinfo_main(hekafnames);
-        end
-        temp=load([pathtofile,'/',fname]);
-        hyps=strfind(gscstring,'_');
-        g=str2num(gscstring(2:hyps(1)-1));
-        s=str2num(gscstring(hyps(1)+2:hyps(2)-1));
-        c=str2num(gscstring(hyps(2)+2:end));
-        ividx=find(temp.seriesnums(:,1)==g & temp.seriesnums(:,2)==s);
-        datasum.IVtime=temp.seriesdata(ividx).realtime;
-        idxofthatday=find(~cellfun(@isempty,regexp(alltheivdata.fnames,fname(1:6))));
-        starttimes=[];
-        for fileidxi=1:length(idxofthatday)
-            pathtofile=alltheivdata.paths{idxofthatday(fileidxi)};
+            fidx=find(strcmp([fname,'.mat'],alltheivdata.fnames),1,'first');
+            pathtofile=alltheivdata.paths{fidx};
             hely=strfind(pathtofile,'IV');
             pathtofile=[pathtofile(1:hely-1),'TreeData',pathtofile(hely+2:end)];
-            a=dir([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+            a=dir([pathtofile,'/',fname,'.mat']);
             if isempty(a)
-                pathtohekafile=alltheivdata.paths{idxofthatday(fileidxi)};
+                pathtohekafile=alltheivdata.paths{fidx};
                 hely=strfind(pathtohekafile,'MATLABdata');
                 pathtohekafile=[pathtohekafile(1:hely-1),'HEKAdata',pathtohekafile(hely+13:end)];
                 hekafnames=[];
                 hekafnames{1,1}=pathtohekafile;
-                newhekafname=alltheivdata.fnames{idxofthatday(fileidxi)};
-                hekafnames{1,2}=[newhekafname(1:end-3),'dat'];
-                a=dir([hekafnames{1,1},'/',hekafnames{1,2}]);
-                if ~isempty(a)
-                    if warningshown==false
-                        hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
-                        uiwait(hwarning);
-                        warningshown=true;
+                hekafnames{1,2}=[fname,'.dat'];
+                if warningshown==false
+                    hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
+                    uiwait(hwarning);
+                    warningshown=true;
+                end
+                hiba=HEKA_exporttreeinfo_main(hekafnames);
+            end
+            temp=load([pathtofile,'/',fname]);
+            hyps=strfind(gscstring,'_');
+            g=str2num(gscstring(2:hyps(1)-1));
+            s=str2num(gscstring(hyps(1)+2:hyps(2)-1));
+            c=str2num(gscstring(hyps(2)+2:end));
+            ividx=find(temp.seriesnums(:,1)==g & temp.seriesnums(:,2)==s);
+            datasum.IVtime=temp.seriesdata(ividx).realtime;
+            idxofthatday=find(~cellfun(@isempty,regexp(alltheivdata.fnames,fname(1:6))));
+            starttimes=[];
+            for fileidxi=1:length(idxofthatday)
+                pathtofile=alltheivdata.paths{idxofthatday(fileidxi)};
+                hely=strfind(pathtofile,'IV');
+                pathtofile=[pathtofile(1:hely-1),'TreeData',pathtofile(hely+2:end)];
+                a=dir([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+                if isempty(a)
+                    pathtohekafile=alltheivdata.paths{idxofthatday(fileidxi)};
+                    hely=strfind(pathtohekafile,'MATLABdata');
+                    pathtohekafile=[pathtohekafile(1:hely-1),'HEKAdata',pathtohekafile(hely+13:end)];
+                    hekafnames=[];
+                    hekafnames{1,1}=pathtohekafile;
+                    newhekafname=alltheivdata.fnames{idxofthatday(fileidxi)};
+                    hekafnames{1,2}=[newhekafname(1:end-3),'dat'];
+                    a=dir([hekafnames{1,1},'/',hekafnames{1,2}]);
+                    if ~isempty(a)
+                        if warningshown==false
+                            hwarning=warndlg('Please start the Fitmaster program, then press OK.','!! Warning !!');
+                            uiwait(hwarning);
+                            warningshown=true;
+                        end
+                        hiba=HEKA_exporttreeinfo_main(hekafnames);
+                    else
+                        disp(['HEKA dat file: ',hekafnames{1,2},' not found']);
                     end
-                    hiba=HEKA_exporttreeinfo_main(hekafnames);
-                else
-                    disp(['HEKA dat file: ',hekafnames{1,2},' not found']);
+                end
+                a=dir([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+                if ~isempty(a)
+                    temp=load([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
+                    starttimes(fileidxi)=temp.seriesdata(1).realtime(1);
                 end
             end
-            a=dir([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
-            if ~isempty(a)
-                temp=load([pathtofile,'/',alltheivdata.fnames{idxofthatday(fileidxi)}]);
-                starttimes(fileidxi)=temp.seriesdata(1).realtime(1);
-            end
+            starttimes(starttimes<28800)=[]; % what happens earlier than 8AM is deleted because it belongs to the next day
+            %%
+            datasum.firstrecordingtimethatday=min(starttimes);
+        else
+            datasum.firstrecordingtimethatday=NaN;
+            datasum.IVtime=NaN;
         end
-        starttimes(starttimes<28800)=[]; % what happens earlier than 8AM is deleted because it belongs to the next day
-        datasum.firstrecordingtimethatday=min(starttimes);
-        %%
         if isempty(fieldnames(DATASUM))
             NEXT=1;
             clear DATASUM
@@ -358,7 +339,7 @@ for i=1:hossz
     end
 end
 
-%% (8) statistics and writing data to xls file
+%% statistics and writing data to xls file
 if projectdata.generateXLSfile==1
     [locations]=marcicucca_locations;
     
