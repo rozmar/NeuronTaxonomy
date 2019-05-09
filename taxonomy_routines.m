@@ -95,6 +95,11 @@ projects(17).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_an
 projects(17).listName='human_anna.txt';
 projects(17).xlsname='human_anna.xlsx';
 
+projects(18).Name='human_rat_NGFC_Norbi';
+projects(18).listPath=[locations.tgtardir,'ANALYSISdata/marci/_Taxonomy/human_rat_NGFC_Norbi'];
+projects(18).listName='human_rat_NGFC_Norbi.txt';
+projects(18).xlsname='human_rat_NGFC_Norbi.xlsx';
+
 projectdata=[];
 
 h=taxonomy_routines_starter(projects);

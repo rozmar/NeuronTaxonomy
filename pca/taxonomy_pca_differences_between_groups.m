@@ -2,18 +2,18 @@ function taxonomy_pca_differences_between_groups(DATASUM)
 %% variables
 csoportok=unique([DATASUM.class]);
 
-csoport1=7;
-csoport2=8;
+csoport1=1;
+csoport2=2;
 
 csoport1idx=find(csoportok==csoport1);
 csoport2idx=find(csoportok==csoport2);
 
 signvalbetweengroups=.01; % significance level when comparing groups
 
-mergecorrelatingvals=0; % use only one from the correlating variables
-corrpval=.001; % threshold for correlation (p)
+mergecorrelatingvals=1; % use only one from the correlating variables
+corrpval=.00001; % threshold for correlation (p)
 
-count=10; %the number of variables included in the PCA
+count=200; %the number of variables included in the PCA
 
 %% csoport hisztogramok
 close all
@@ -128,15 +128,15 @@ maxval2=ceil(score2vals(round(length(score2vals)*percentiles(2)))*2)/2;
 binnum=10;
 step1=(maxval1-minval1)/binnum;
 step2=(maxval2-minval2)/binnum;
-plot3(SCORE([DATASUM.class]==csoport1,1),SCORE([DATASUM.class]==csoport1,2),SCORE([DATASUM.class]==csoport1,3),'ro','MarkerFaceColor',[1 0 0]);
-plot3(SCORE([DATASUM.class]==csoport2,1),SCORE([DATASUM.class]==csoport2,2),SCORE([DATASUM.class]==csoport2,3),'bo','MarkerFaceColor',[0 0 1]);
-plot3(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,2),SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,3),'ko','MarkerFaceColor',[1 1 1]);
+plot3(SCORE([DATASUM.class]==csoport1,1),SCORE([DATASUM.class]==csoport1,2),SCORE([DATASUM.class]==csoport1,3),'bo','MarkerFaceColor',[0 0 1]);
+plot3(SCORE([DATASUM.class]==csoport2,1),SCORE([DATASUM.class]==csoport2,2),SCORE([DATASUM.class]==csoport2,3),'ro','MarkerFaceColor',[1 0 0]);
+plot3(SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,2),SCORE([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,3),'go','MarkerFaceColor',[0 1 0]);
 
 xlabel('1st principal component')
 ylabel('2nd principal component')
 zlabel('3rd principal component')
-plot3(medians(1,1),medians(1,2),medians(1,3),'rx','MarkerSize',16,'LineWidth',3)
-plot3(medians(2,1),medians(2,2),medians(2,3),'bx','MarkerSize',16,'LineWidth',3)
+plot3(medians(1,1),medians(1,2),medians(1,3),'bx','MarkerSize',16,'LineWidth',3)
+plot3(medians(2,1),medians(2,2),medians(2,3),'rx','MarkerSize',16,'LineWidth',3)
 plot3(medians(:,1),medians(:,2),medians(:,3),'ko-','MarkerSize',16,'LineWidth',3)
 
 xlim([minval1 maxval1])
@@ -147,7 +147,7 @@ hold on
 [n11,~]=hist(SCORE([DATASUM.class]==csoport1,1),xout);
 [n21,~]=hist(SCORE([DATASUM.class]==csoport2,1),xout);
 bar1=bar(xout,[nall;n21;n11]','grouped');%,'k','b','r','FaceColor',[1 1 1]
-set(bar1(1),'FaceColor',[1 1 1]) ;
+set(bar1(1),'FaceColor',[0 1 0]) ;
 set(bar1(2),'FaceColor',[0 0 1]) ;
 set(bar1(3),'FaceColor',[1 0 0]) ;
 set(bar1,'barwidth',1) ;
@@ -161,7 +161,7 @@ hold on
 [n11,~]=hist(SCORE([DATASUM.class]==csoport1,2),xout);
 [n21,~]=hist(SCORE([DATASUM.class]==csoport2,2),xout);
 bar1=barh(xout,[nall;n21;n11]','grouped');%,'k','FaceColor',[1 1 1])
-set(bar1(1),'FaceColor',[1 1 1]) ;
+set(bar1(1),'FaceColor',[0 1 0]) ;
 set(bar1(2),'FaceColor',[0 0 1]) ;
 set(bar1(3),'FaceColor',[1 0 0]) ;
 set(bar1,'barwidth',1) ;
@@ -174,9 +174,9 @@ ylim([minval2 maxval2])
 figure(2)
 clf
 hold on
-plot3(princompmatrixnew([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),princompmatrixnew([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,2),princompmatrixnew([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,3),'ko','MarkerFaceColor',[1 1 1]);
-plot3(princompmatrixnew([DATASUM.class]==csoport1,1),princompmatrixnew([DATASUM.class]==csoport1,2),princompmatrixnew([DATASUM.class]==csoport1,3),'ro','MarkerFaceColor',[1 0 0]);
-plot3(princompmatrixnew([DATASUM.class]==csoport2,1),princompmatrixnew([DATASUM.class]==csoport2,2),princompmatrixnew([DATASUM.class]==csoport2,3),'bo','MarkerFaceColor',[0 0 1]);
+plot3(princompmatrixnew([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,1),princompmatrixnew([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,2),princompmatrixnew([DATASUM.class]~=csoport1 & [DATASUM.class]~=csoport2,3),'go','MarkerFaceColor',[0 1 0]);
+plot3(princompmatrixnew([DATASUM.class]==csoport1,1),princompmatrixnew([DATASUM.class]==csoport1,2),princompmatrixnew([DATASUM.class]==csoport1,3),'bo','MarkerFaceColor',[0 0 1]);
+plot3(princompmatrixnew([DATASUM.class]==csoport2,1),princompmatrixnew([DATASUM.class]==csoport2,2),princompmatrixnew([DATASUM.class]==csoport2,3),'ro','MarkerFaceColor',[1 0 0]);
 xlabel(princompnamesnew{1})
 ylabel(princompnamesnew{2})
 zlabel(princompnamesnew{3})
